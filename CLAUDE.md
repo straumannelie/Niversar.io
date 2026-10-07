@@ -49,6 +49,7 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 - Ne pas modifier le `.pbxproj` au-delà des réglages de build explicitement demandés. Ne jamais y ajouter de package : c'est fait à la main dans Xcode.
 - Si une demande est une mauvaise idée ou entre en conflit avec ce fichier, le dire franchement avant d'agir.
 - Si une action demande des droits administrateur, s'arrêter et le signaler.
+- Après chaque commit, git push sur origin main.
 
 ## Décisions produit
 - Saisie manuelle uniquement (pas d'accès aux Contacts).
