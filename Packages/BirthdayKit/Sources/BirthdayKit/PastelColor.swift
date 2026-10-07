@@ -11,4 +11,9 @@ public enum PastelColor: String, Codable, CaseIterable, Sendable {
     case lime
     case periwinkle
     case apricot
+
+    public init?(month: Int) {
+        guard (1...12).contains(month) else { return nil }
+        self = Self.allCases[month - 1]
+    }
 }

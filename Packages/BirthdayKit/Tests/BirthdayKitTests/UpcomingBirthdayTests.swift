@@ -7,10 +7,10 @@ struct UpcomingBirthdayTests {
     func sortedByDaysRemainingAndLimited() throws {
         let lisbon = try Lisbon()
         let birthdays = [
-            birthday("Adam", try birthDate(25, 6)),
-            birthday("Zoé", try birthDate(15, 6, 1990)),
-            birthday("Noé", try birthDate(18, 6)),
-            birthday("Lina", try birthDate(1, 1)),
+            try birthday("Adam", birthDate(25, 6)),
+            try birthday("Zoé", birthDate(15, 6, 1990)),
+            try birthday("Noé", birthDate(18, 6)),
+            try birthday("Lina", birthDate(1, 1)),
         ]
 
         let upcoming = birthdays.upcoming(limit: 2, from: try lisbon.date(Day(2026, 6, 15)), in: lisbon.calendar)
@@ -25,7 +25,7 @@ struct UpcomingBirthdayTests {
     func tiesAreSortedByFirstName() throws {
         let lisbon = try Lisbon()
         let sameDay = try birthDate(20, 6)
-        let birthdays = ["Zoé", "émile", "Adam", "Élodie"].map { birthday($0, sameDay) }
+        let birthdays = try ["Zoé", "émile", "Adam", "Élodie"].map { try birthday($0, sameDay) }
 
         let upcoming = birthdays.upcoming(limit: 10, from: try lisbon.date(Day(2026, 6, 15)), in: lisbon.calendar)
 
@@ -35,7 +35,7 @@ struct UpcomingBirthdayTests {
     @Test("Limite supérieure au nombre de personnes, nulle ou négative", arguments: [(10, 2), (0, 0), (-1, 0)])
     func limitIsRespected(limit: Int, expectedCount: Int) throws {
         let lisbon = try Lisbon()
-        let birthdays = [birthday("Adam", try birthDate(25, 6)), birthday("Lina", try birthDate(1, 1))]
+        let birthdays = [try birthday("Adam", birthDate(25, 6)), try birthday("Lina", birthDate(1, 1))]
 
         let upcoming = birthdays.upcoming(limit: limit, from: try lisbon.date(Day(2026, 6, 15)), in: lisbon.calendar)
 

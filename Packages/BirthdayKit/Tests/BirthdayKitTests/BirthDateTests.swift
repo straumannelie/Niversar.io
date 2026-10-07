@@ -31,7 +31,9 @@ struct BirthDateTests {
 
     @Test("Encodage puis décodage à l'identique", arguments: [nil, 1992] as [Int?])
     func codableRoundTrip(year: Int?) throws {
-        let original = Birthday(firstName: "Zoé", birthDate: try birthDate(29, 2, year), color: .lavender, emoji: "🦄")
+        let original = try #require(
+            Birthday(firstName: "Zoé", birthDate: try birthDate(29, 2, year), color: .lavender, emoji: "🦄")
+        )
         let decoded = try JSONDecoder().decode(Birthday.self, from: JSONEncoder().encode(original))
         #expect(decoded == original)
     }

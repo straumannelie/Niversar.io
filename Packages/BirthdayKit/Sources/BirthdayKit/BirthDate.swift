@@ -17,6 +17,10 @@ public struct BirthDate: Sendable, Hashable {
         return (month: month, day: day)
     }
 
+    public static func maximumDay(inMonth month: Int) -> Int {
+        numberOfDays(inMonth: month, year: nil)
+    }
+
     static func isLeapYear(_ year: Int) -> Bool {
         year.isMultiple(of: 4) && (!year.isMultiple(of: 100) || year.isMultiple(of: 400))
     }

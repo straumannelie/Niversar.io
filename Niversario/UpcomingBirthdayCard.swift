@@ -29,3 +29,13 @@ struct UpcomingBirthdayCard: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+#Preview {
+    if let birthDate = BirthDate(day: 1, month: 1, year: 1996),
+        let birthday = Birthday(firstName: "Léa", birthDate: birthDate, color: .rose, emoji: "🌸"),
+        let upcoming = [birthday].upcoming(limit: 1, from: .now, in: Calendar(identifier: .gregorian)).first
+    {
+        UpcomingBirthdayCard(upcoming: upcoming)
+            .padding()
+    }
+}

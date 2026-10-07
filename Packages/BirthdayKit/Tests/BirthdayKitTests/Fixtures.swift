@@ -43,6 +43,6 @@ func birthDate(_ day: Int, _ month: Int, _ year: Int? = nil) throws -> BirthDate
     try #require(BirthDate(day: day, month: month, year: year))
 }
 
-func birthday(_ firstName: String, _ birthDate: BirthDate) -> Birthday {
-    Birthday(firstName: firstName, birthDate: birthDate, color: .rose)
+func birthday(_ firstName: String, _ birthDate: BirthDate, id: UUID = UUID()) throws -> Birthday {
+    try #require(Birthday(id: id, firstName: firstName, birthDate: birthDate, color: .rose))
 }
