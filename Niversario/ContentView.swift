@@ -1,21 +1,12 @@
-//
-//  ContentView.swift
-//  Niversario
-//
-//  Created by Elie Straumann on 07/10/2026.
-//
-
+import BirthdayKit
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        Text(BirthdayKit.appName)
+            .font(.largeTitle.bold())
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.appBackground)
     }
 }
 
