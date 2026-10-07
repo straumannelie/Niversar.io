@@ -1,15 +1,20 @@
 import BirthdayKit
 import SwiftUI
 import UIKit
+import UserNotifications
 
 struct ContentView: View {
     let store: BirthdayStore
+    let reminders: ReminderScheduler
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var today = Date.now
     @State private var isAddingBirthday = false
     @State private var birthdayPendingDeletion: Birthday?
     @State private var addedBirthdaysCount = 0
+    #if DEBUG
+        @State private var isShowingScheduledReminders = false
+    #endif
 
     private let calendar = Calendar(identifier: .gregorian)
 
@@ -18,6 +23,12 @@ struct ContentView: View {
 
         NavigationStack {
             List {
+                if reminders.isDenied {
+                    Section {
+                        NotificationsDisabledBanner()
+                            .listRowBackground(Color.appSurface)
+                    }
+                }
                 if !upcoming.isEmpty {
                     nextBirthdaysSection(Array(upcoming.prefix(2)))
                     allBirthdaysSection(upcoming)
@@ -36,6 +47,9 @@ struct ContentView: View {
             }
             .navigationTitle("Niversar.io")
             .toolbar {
+                ToolbarItem(placement: .largeTitle) {
+                    title
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Ajouter", systemImage: "plus") {
                         isAddingBirthday = true
@@ -47,8 +61,14 @@ struct ContentView: View {
                 NewBirthdayView(today: today, calendar: calendar) { birthday in
                     store.addOrReplace(birthday)
                     addedBirthdaysCount += 1
+                    Task { await reminders.requestAuthorizationIfNeeded() }
                 }
             }
+            #if DEBUG
+                .sheet(isPresented: $isShowingScheduledReminders) {
+                    ScheduledRemindersDebugView(reminders: reminders, birthdays: store.birthdays)
+                }
+            #endif
             .alert(
                 deletionTitle,
                 isPresented: isConfirmingDeletion,
@@ -74,6 +94,11 @@ struct ContentView: View {
             guard scenePhase == .active else { return }
             today = .now
             store.loadIfNeeded()
+            Task { await reminders.refreshAuthorizationStatus() }
+        }
+        .task(id: reminderInputs) {
+            guard store.isLoaded else { return }
+            await reminders.reschedule(store.birthdays, now: today)
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             today = .now
@@ -110,6 +135,27 @@ struct ContentView: View {
         }
     }
 
+    private var title: some View {
+        Text("Niversar.io")
+            .font(.largeTitle.bold())
+            .foregroundStyle(Color.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            #if DEBUG
+                .onLongPressGesture {
+                    isShowingScheduledReminders = true
+                }
+            #endif
+    }
+
+    private var reminderInputs: ReminderInputs {
+        ReminderInputs(
+            birthdays: store.birthdays,
+            today: today,
+            isLoaded: store.isLoaded,
+            authorizationStatus: reminders.authorizationStatus
+        )
+    }
+
     private var deletionTitle: String {
         birthdayPendingDeletion.map { "Supprimer \($0.firstName) ?" } ?? ""
     }
@@ -137,12 +183,20 @@ struct ContentView: View {
     }
 }
 
+private struct ReminderInputs: Equatable {
+    let birthdays: [Birthday]
+    let today: Date
+    let isLoaded: Bool
+    let authorizationStatus: UNAuthorizationStatus
+}
+
 #Preview {
     ContentView(
         store: BirthdayStore(
             repository: BirthdayFileRepository(
                 fileURL: URL.temporaryDirectory.appending(path: "preview-birthdays.json")
             )
-        )
+        ),
+        reminders: ReminderScheduler()
     )
 }
