@@ -27,13 +27,14 @@ Pas d'App Store, pas de serveur, pas de compte, pas de synchronisation. Tout est
 Niversario.xcodeproj
 Niversario/                 app SwiftUI (dossier synchronisé : un fichier ajouté ici est pris en compte sans toucher au .pbxproj)
 Packages/BirthdayKit/       logique métier pure, sans UI, testable sur macOS avec `swift test`
-scripts/                    check.sh (format + lint + tests), run-device.sh (build + install + lancement sur l'iPhone)
+scripts/                    check.sh (format + lint + tests), run-device.sh (build + install + lancement sur l'iPhone), screenshot.sh (capture dans le simulateur)
 ```
 Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `BirthdayKit`. L'app ne fait que l'afficher.
 
 ## Commandes
 - `scripts/check.sh` : formatage, lint strict, tests du package. Doit passer avant chaque commit.
 - `scripts/run-device.sh` : compile, installe et lance l'app sur l'iPhone.
+- `scripts/screenshot.sh [-demo] [-screen form|edit|detail|day]` : compile pour le simulateur, lance avec ces arguments (Debug uniquement) et enregistre une capture dans `build/screenshots/`.
 
 ## Conventions de code
 - **Aucun commentaire dans le code.** Le code doit se lire seul : noms explicites, petites fonctions.
@@ -50,6 +51,7 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 - Si une demande est une mauvaise idée ou entre en conflit avec ce fichier, le dire franchement avant d'agir.
 - Si une action demande des droits administrateur, s'arrêter et le signaler.
 - Après chaque commit, git push sur origin main.
+- Pour tout changement visuel, vérifier le rendu avec scripts/screenshot.sh et regarder la capture avant de rendre la main. Les emojis s'affichent « ? » dans le simulateur : seul l'iPhone fait foi pour eux.
 
 ## Décisions produit
 - Saisie manuelle uniquement (pas d'accès aux Contacts).

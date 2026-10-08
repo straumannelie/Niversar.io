@@ -29,6 +29,19 @@ final class BirthdayStore {
         return BirthdayStore(repository: BirthdayFileRepository(fileURL: fileURL))
     }
 
+    #if DEBUG
+        static func demo(today: Date, calendar: Calendar) -> BirthdayStore {
+            let directory = URL.temporaryDirectory.appending(path: "NiversarioDemo-\(UUID().uuidString)")
+            let store = BirthdayStore(
+                repository: BirthdayFileRepository(fileURL: directory.appending(path: "birthdays.json")),
+                photos: PhotoStorage(directory: directory.appending(path: "Photos"))
+            )
+            store.birthdays = DemoData.birthdays(today: today, calendar: calendar)
+            store.isLoaded = true
+            return store
+        }
+    #endif
+
     func loadIfNeeded() {
         guard !isLoaded else { return }
         do {

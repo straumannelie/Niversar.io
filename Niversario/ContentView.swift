@@ -7,6 +7,7 @@ import UserNotifications
 struct ContentView: View {
     let store: BirthdayStore
     let reminders: ReminderScheduler
+    var schedulesReminders = true
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var today = Date.now
@@ -20,6 +21,8 @@ struct ContentView: View {
     @Namespace private var zoomNamespace
     #if DEBUG
         @State private var isShowingScheduledReminders = false
+        @State private var debugEditedBirthday: Birthday?
+        @State private var hasOpenedLaunchScreen = false
     #endif
 
     private let calendar = Calendar(identifier: .gregorian)
@@ -128,6 +131,14 @@ struct ContentView: View {
                 .sheet(isPresented: $isShowingScheduledReminders) {
                     ScheduledRemindersDebugView(reminders: reminders, birthdays: store.birthdays)
                 }
+                .sheet(item: $debugEditedBirthday) { birthday in
+                    BirthdayFormView(editing: birthday, today: today, calendar: calendar) { editedBirthday in
+                        store.addOrReplace(editedBirthday)
+                    }
+                }
+                .onChange(of: store.isLoaded, initial: true) {
+                    openLaunchScreen()
+                }
             #endif
         }
         .alert(
@@ -147,13 +158,48 @@ struct ContentView: View {
             Task { await reminders.refreshAuthorizationStatus() }
         }
         .task(id: reminderInputs) {
-            guard store.isLoaded else { return }
+            guard store.isLoaded, schedulesReminders else { return }
             await reminders.reschedule(store.birthdays, now: today)
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             today = .now
         }
     }
+
+    #if DEBUG
+        private func openLaunchScreen() {
+            guard store.isLoaded, !hasOpenedLaunchScreen, let screen = LaunchOptions.screen else { return }
+            hasOpenedLaunchScreen = true
+            let first = store.birthdays.upcoming(limit: 1, from: today, in: calendar).first
+            switch screen {
+            case .form:
+                isAddingBirthday = true
+            case .edit:
+                debugEditedBirthday = first?.birthday
+            case .detail:
+                if let first {
+                    presentedBirthday = PresentedBirthday(id: first.id, source: .card(first.id))
+                }
+            case .day:
+                selectedDay = firstSharedDay
+            }
+        }
+
+        private var firstSharedDay: SelectedDay? {
+            let sharedDate = store.birthdays.first { birthday in
+                store.birthdays.contains {
+                    $0.id != birthday.id && $0.birthDate.day == birthday.birthDate.day
+                        && $0.birthDate.month == birthday.birthDate.month
+                }
+            }?.birthDate
+            return sharedDate.map {
+                SelectedDay(
+                    month: CalendarMonth(year: calendar.component(.year, from: today), month: $0.month),
+                    day: $0.day
+                )
+            }
+        }
+    #endif
 
     private func select(_ day: SelectedDay) {
         let people = day.month.birthdaysByDay(store.birthdays)[day.day] ?? []
