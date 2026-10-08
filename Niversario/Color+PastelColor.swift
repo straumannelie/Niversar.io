@@ -27,3 +27,22 @@ extension Color {
         )
     }
 }
+
+extension PastelColor {
+    var displayName: String {
+        switch self {
+        case .rose: "Rose"
+        case .peach: "Pêche"
+        case .lemon: "Citron"
+        case .mint: "Menthe"
+        case .sky: "Ciel"
+        case .lavender: "Lavande"
+        case .orchid: "Orchidée"
+        case .aqua: "Aqua"
+        case .blush: "Rose poudré"
+        case .lime: "Citron vert"
+        case .periwinkle: "Pervenche"
+        case .apricot: "Abricot"
+        }
+    }
+}

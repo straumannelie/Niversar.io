@@ -66,7 +66,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $isAddingBirthday) {
-                NewBirthdayView(today: today, calendar: calendar) { birthday in
+                BirthdayFormView(today: today, calendar: calendar) { birthday in
                     store.addOrReplace(birthday)
                     addedBirthdaysCount += 1
                     Task { await reminders.requestAuthorizationIfNeeded() }

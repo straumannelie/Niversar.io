@@ -9,6 +9,7 @@ struct DayBirthdaysView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var birthdayPendingDeletion: Birthday?
+    @State private var birthdayBeingEdited: Birthday?
 
     var body: some View {
         let people = selectedDay.month.birthdaysByDay(store.birthdays)[selectedDay.day] ?? []
@@ -17,15 +18,20 @@ struct DayBirthdaysView: View {
         NavigationStack {
             List {
                 ForEach(upcoming) { upcomingBirthday in
-                    BirthdayRow(upcoming: upcomingBirthday)
-                        .listRowBackground(Color.appSurface)
-                        .listRowSeparatorTint(Color.appSeparator)
-                        .swipeActions(allowsFullSwipe: false) {
-                            Button("Supprimer", systemImage: "trash") {
-                                birthdayPendingDeletion = upcomingBirthday.birthday
-                            }
-                            .tint(.red)
+                    Button {
+                        birthdayBeingEdited = upcomingBirthday.birthday
+                    } label: {
+                        BirthdayRow(upcoming: upcomingBirthday)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(Color.appSurface)
+                    .listRowSeparatorTint(Color.appSeparator)
+                    .swipeActions(allowsFullSwipe: false) {
+                        Button("Supprimer", systemImage: "trash") {
+                            birthdayPendingDeletion = upcomingBirthday.birthday
                         }
+                        .tint(.red)
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -37,6 +43,11 @@ struct DayBirthdaysView: View {
                     Button(role: .close) {
                         dismiss()
                     }
+                }
+            }
+            .sheet(item: $birthdayBeingEdited) { birthday in
+                BirthdayFormView(editing: birthday, today: today, calendar: calendar) { editedBirthday in
+                    store.addOrReplace(editedBirthday)
                 }
             }
             .alert(
