@@ -33,7 +33,7 @@ public struct BirthDate: Sendable, Hashable {
         return (1...numberOfDays(inMonth: month, year: year)).contains(day)
     }
 
-    private static func numberOfDays(inMonth month: Int, year: Int?) -> Int {
+    static func numberOfDays(inMonth month: Int, year: Int?) -> Int {
         switch month {
         case 2:
             guard let year else { return 29 }

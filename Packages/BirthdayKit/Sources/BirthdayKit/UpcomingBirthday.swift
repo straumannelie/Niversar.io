@@ -50,13 +50,5 @@ private func isBefore(_ lhs: UpcomingBirthday, _ rhs: UpcomingBirthday) -> Bool 
     if lhs.daysRemaining != rhs.daysRemaining {
         return lhs.daysRemaining < rhs.daysRemaining
     }
-    let nameOrder = lhs.birthday.firstName.compare(
-        rhs.birthday.firstName,
-        options: [.caseInsensitive, .diacriticInsensitive],
-        locale: Locale(identifier: "fr_FR")
-    )
-    if nameOrder != .orderedSame {
-        return nameOrder == .orderedAscending
-    }
-    return lhs.id.uuidString < rhs.id.uuidString
+    return Birthday.isOrderedByFirstName(lhs.birthday, rhs.birthday)
 }

@@ -10,7 +10,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var today = Date.now
     @State private var isAddingBirthday = false
-    @State private var birthdayPendingDeletion: Birthday?
+    @State private var selectedDay: SelectedDay?
     @State private var addedBirthdaysCount = 0
     #if DEBUG
         @State private var isShowingScheduledReminders = false
@@ -19,32 +19,40 @@ struct ContentView: View {
     private let calendar = Calendar(identifier: .gregorian)
 
     var body: some View {
-        let upcoming = store.birthdays.upcoming(limit: store.birthdays.count, from: today, in: calendar)
+        let nextBirthdays = store.birthdays.upcoming(limit: 2, from: today, in: calendar)
 
         NavigationStack {
-            List {
-                if reminders.isDenied {
-                    Section {
+            ScrollView {
+                VStack(spacing: 16) {
+                    if reminders.isDenied {
                         NotificationsDisabledBanner()
-                            .listRowBackground(Color.appSurface)
+                            .padding()
+                            .background(Color.appSurface, in: .rect(cornerRadius: 16))
+                            .padding(.horizontal)
+                    }
+                    if store.isLoaded && store.birthdays.isEmpty {
+                        ContentUnavailableView(
+                            "Aucun anniversaire pour l'instant",
+                            systemImage: "birthday.cake",
+                            description: Text("Appuie sur + pour ajouter le premier")
+                        )
+                    } else {
+                        ForEach(nextBirthdays) { upcomingBirthday in
+                            UpcomingBirthdayCard(upcoming: upcomingBirthday)
+                                .padding(.horizontal)
+                        }
+                    }
+                    BirthdayCalendar(
+                        birthdays: store.birthdays,
+                        currentMonth: CalendarMonth.containing(today, in: calendar),
+                        todayDay: calendar.component(.day, from: today)
+                    ) { day in
+                        selectedDay = day
                     }
                 }
-                if !upcoming.isEmpty {
-                    nextBirthdaysSection(Array(upcoming.prefix(2)))
-                    allBirthdaysSection(upcoming)
-                }
+                .padding(.vertical)
             }
-            .scrollContentBackground(.hidden)
             .background(Color.appBackground)
-            .overlay {
-                if store.isLoaded && store.birthdays.isEmpty {
-                    ContentUnavailableView(
-                        "Aucun anniversaire pour l'instant",
-                        systemImage: "birthday.cake",
-                        description: Text("Appuie sur + pour ajouter le premier")
-                    )
-                }
-            }
             .navigationTitle("Niversar.io")
             .toolbar {
                 ToolbarItem(placement: .largeTitle) {
@@ -64,21 +72,14 @@ struct ContentView: View {
                     Task { await reminders.requestAuthorizationIfNeeded() }
                 }
             }
+            .sheet(item: $selectedDay) { day in
+                DayBirthdaysView(selectedDay: day, store: store, today: today, calendar: calendar)
+            }
             #if DEBUG
                 .sheet(isPresented: $isShowingScheduledReminders) {
                     ScheduledRemindersDebugView(reminders: reminders, birthdays: store.birthdays)
                 }
             #endif
-            .alert(
-                deletionTitle,
-                isPresented: isConfirmingDeletion,
-                presenting: birthdayPendingDeletion
-            ) { birthday in
-                Button("Supprimer", role: .destructive) {
-                    store.remove(id: birthday.id)
-                }
-                Button("Annuler", role: .cancel) {}
-            }
         }
         .alert(
             store.alert?.title ?? "",
@@ -105,36 +106,6 @@ struct ContentView: View {
         }
     }
 
-    private func nextBirthdaysSection(_ nextBirthdays: [UpcomingBirthday]) -> some View {
-        Section {
-            ForEach(nextBirthdays) { upcomingBirthday in
-                UpcomingBirthdayCard(upcoming: upcomingBirthday)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
-        }
-    }
-
-    private func allBirthdaysSection(_ upcoming: [UpcomingBirthday]) -> some View {
-        Section {
-            ForEach(upcoming) { upcomingBirthday in
-                BirthdayRow(upcoming: upcomingBirthday)
-                    .listRowBackground(Color.appSurface)
-                    .listRowSeparatorTint(Color.appSeparator)
-                    .swipeActions(allowsFullSwipe: false) {
-                        Button("Supprimer", systemImage: "trash") {
-                            birthdayPendingDeletion = upcomingBirthday.birthday
-                        }
-                        .tint(.red)
-                    }
-            }
-        } header: {
-            Text("Tous les anniversaires")
-                .foregroundStyle(Color.textSecondary)
-        }
-    }
-
     private var title: some View {
         Text("Niversar.io")
             .font(.largeTitle.bold())
@@ -153,21 +124,6 @@ struct ContentView: View {
             today: today,
             isLoaded: store.isLoaded,
             authorizationStatus: reminders.authorizationStatus
-        )
-    }
-
-    private var deletionTitle: String {
-        birthdayPendingDeletion.map { "Supprimer \($0.firstName) ?" } ?? ""
-    }
-
-    private var isConfirmingDeletion: Binding<Bool> {
-        Binding(
-            get: { birthdayPendingDeletion != nil },
-            set: { isPresented in
-                if !isPresented {
-                    birthdayPendingDeletion = nil
-                }
-            }
         )
     }
 

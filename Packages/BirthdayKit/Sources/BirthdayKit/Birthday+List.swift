@@ -15,3 +15,17 @@ extension [Birthday] {
         filter { $0.id != id }
     }
 }
+
+extension Birthday {
+    static func isOrderedByFirstName(_ lhs: Birthday, _ rhs: Birthday) -> Bool {
+        let nameOrder = lhs.firstName.compare(
+            rhs.firstName,
+            options: [.caseInsensitive, .diacriticInsensitive],
+            locale: Locale(identifier: "fr_FR")
+        )
+        if nameOrder != .orderedSame {
+            return nameOrder == .orderedAscending
+        }
+        return lhs.id.uuidString < rhs.id.uuidString
+    }
+}
