@@ -58,9 +58,7 @@ struct MonthPage: View {
                     cell
                 }
                 .buttonStyle(.plain)
-                .matchedTransitionSource(id: ZoomSource.day(month, day), in: zoomNamespace) {
-                    $0.clipShape(RoundedRectangle(cornerRadius: 100))
-                }
+                .matchedTransitionSource(id: ZoomSource.day(month, day), in: zoomNamespace)
                 .accessibilityLabel(month.birthdayAccessibilityLabel(day: day, firstNames: birthdays.map(\.firstName)))
             }
         } else {
