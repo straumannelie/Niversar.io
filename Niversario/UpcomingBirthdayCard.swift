@@ -27,6 +27,7 @@ struct UpcomingBirthdayCard: View {
         .padding()
         .background(Color.appSurface, in: .rect(cornerRadius: 20))
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(upcoming.accessibilityLabel)
     }
 }
 

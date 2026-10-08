@@ -25,5 +25,6 @@ struct BirthdayRow: View {
                 .accessibilityHidden(true)
         }
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(upcoming.accessibilityLabel)
     }
 }

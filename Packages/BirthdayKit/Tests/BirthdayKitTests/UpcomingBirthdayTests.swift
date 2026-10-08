@@ -50,13 +50,30 @@ struct UpcomingBirthdayTests {
             (2, nil, "Dans 2 jours"),
             (364, nil, "Dans 364 jours"),
             (0, 0, "Aujourd'hui · 0 an"),
-            (1, 1, "Demain · 1 an"),
-            (5, 2, "Dans 5 jours · 2 ans"),
-            (0, 30, "Aujourd'hui · 30 ans"),
+            (0, 37, "Aujourd'hui · 37 ans"),
+            (1, 1, "Demain · va avoir 1 an"),
+            (1, 37, "Demain · va avoir 37 ans"),
+            (3, 37, "Dans 3 jours · va avoir 37 ans"),
+            (5, 2, "Dans 5 jours · va avoir 2 ans"),
         ] as [(Int, Int?, String)]
     )
     func label(daysRemaining: Int, age: Int?, expected: String) {
         #expect(UpcomingBirthday.label(daysRemaining: daysRemaining, age: age) == expected)
+    }
+
+    @Test(
+        "Libellé VoiceOver de la carte",
+        arguments: [
+            (0, 37, "Léa, aujourd'hui, 37 ans"),
+            (1, 1, "Léa, demain, va avoir 1 an"),
+            (3, 37, "Léa, dans 3 jours, va avoir 37 ans"),
+            (3, nil, "Léa, dans 3 jours"),
+            (0, nil, "Léa, aujourd'hui"),
+        ] as [(Int, Int?, String)]
+    )
+    func accessibilityLabel(daysRemaining: Int, age: Int?, expected: String) {
+        #expect(
+            UpcomingBirthday.accessibilityLabel(firstName: "Léa", daysRemaining: daysRemaining, age: age) == expected)
     }
 }
 

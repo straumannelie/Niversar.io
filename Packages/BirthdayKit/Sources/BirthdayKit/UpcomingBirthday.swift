@@ -15,6 +15,10 @@ public struct UpcomingBirthday: Identifiable, Sendable, Hashable {
         Self.countdownLabel(daysRemaining: daysRemaining)
     }
 
+    public var accessibilityLabel: String {
+        Self.accessibilityLabel(firstName: birthday.firstName, daysRemaining: daysRemaining, age: age)
+    }
+
     init?(birthday: Birthday, today: Date, calendar: Calendar) {
         guard let daysRemaining = birthday.birthDate.daysUntilNextOccurrence(from: today, in: calendar) else {
             return nil
@@ -25,13 +29,28 @@ public struct UpcomingBirthday: Identifiable, Sendable, Hashable {
     }
 
     public static func label(daysRemaining: Int, age: Int?) -> String {
-        let countdown = countdownLabel(daysRemaining: daysRemaining)
-        guard let age else { return countdown }
-        return "\(countdown) · \(ageLabel(age))"
+        [countdownLabel(daysRemaining: daysRemaining), upcomingAgeLabel(daysRemaining: daysRemaining, age: age)]
+            .compactMap { $0 }
+            .joined(separator: " · ")
+    }
+
+    public static func accessibilityLabel(firstName: String, daysRemaining: Int, age: Int?) -> String {
+        [
+            firstName,
+            countdownLabel(daysRemaining: daysRemaining).lowercased(),
+            upcomingAgeLabel(daysRemaining: daysRemaining, age: age),
+        ]
+        .compactMap { $0 }
+        .joined(separator: ", ")
     }
 
     public static func ageLabel(_ age: Int) -> String {
         "\(age) \(age < 2 ? "an" : "ans")"
+    }
+
+    private static func upcomingAgeLabel(daysRemaining: Int, age: Int?) -> String? {
+        guard let age else { return nil }
+        return daysRemaining == 0 ? ageLabel(age) : "va avoir \(ageLabel(age))"
     }
 
     private static func countdownLabel(daysRemaining: Int) -> String {
