@@ -23,7 +23,6 @@ struct ContentView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var titleCakeBounces = 0
     #if DEBUG
-        @State private var isShowingScheduledReminders = false
         @State private var debugEditedBirthday: Birthday?
         @State private var hasOpenedLaunchScreen = false
     #endif
@@ -128,9 +127,6 @@ struct ContentView: View {
                     .zoomTransition(from: presented.source, in: zoomNamespace)
             }
             #if DEBUG
-                .sheet(isPresented: $isShowingScheduledReminders) {
-                    ScheduledRemindersDebugView(reminders: reminders, birthdays: store.birthdays)
-                }
                 .sheet(item: $debugEditedBirthday) { birthday in
                     BirthdayFormView(editing: birthday, today: today, calendar: calendar) { editedBirthday in
                         store.addOrReplace(editedBirthday)
@@ -243,11 +239,6 @@ struct ContentView: View {
                 .foregroundStyle(Color.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        #if DEBUG
-            .onLongPressGesture {
-                isShowingScheduledReminders = true
-            }
-        #endif
     }
 
     private var hasBirthdayToday: Bool {
