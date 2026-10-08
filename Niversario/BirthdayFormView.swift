@@ -188,8 +188,11 @@ struct BirthdayFormView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isEditing ? "Enregistrer" : "Ajouter 🎉", action: save)
+                        .buttonStyle(.glassProminent)
+                        .tint(Color.accentColor)
                         .disabled(birthday == nil)
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
             .onChange(of: photoItem) {
                 guard let photoItem else { return }

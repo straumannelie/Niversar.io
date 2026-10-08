@@ -58,21 +58,16 @@ struct BirthdayDetailView: View {
                     Button {
                         isEditing = true
                     } label: {
-                        Label("Modifier", systemImage: "pencil")
-                            .frame(maxWidth: .infinity)
+                        actionLabel("Modifier", systemImage: "pencil", color: Color.textPrimary)
                     }
-                    .buttonStyle(.glass)
-                    .controlSize(.large)
+                    .buttonStyle(.plain)
 
                     Button(role: .destructive) {
                         isConfirmingDeletion = true
                     } label: {
-                        Label("Supprimer", systemImage: "trash")
-                            .frame(maxWidth: .infinity)
+                        actionLabel("Supprimer", systemImage: "trash", color: .red)
                     }
-                    .buttonStyle(.glass)
-                    .controlSize(.large)
-                    .tint(.red)
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal)
             }
@@ -143,6 +138,15 @@ struct BirthdayDetailView: View {
                 endPoint: .bottom
             )
         }
+    }
+
+    private func actionLabel(_ title: String, systemImage: String, color: Color) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.body.weight(.semibold))
+            .foregroundStyle(color)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.appSurface, in: .rect(cornerRadius: 16))
     }
 
     private func noteCard(_ note: String) -> some View {
