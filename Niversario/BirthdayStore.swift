@@ -34,9 +34,9 @@ final class BirthdayStore {
             let directory = URL.temporaryDirectory.appending(path: "NiversarioDemo-\(UUID().uuidString)")
             let store = BirthdayStore(
                 repository: BirthdayFileRepository(fileURL: directory.appending(path: "birthdays.json")),
-                photos: PhotoStorage(directory: directory.appending(path: "Photos"))
+                photos: .live
             )
-            store.birthdays = DemoData.birthdays(today: today, calendar: calendar)
+            store.birthdays = DemoData.birthdays(today: today, calendar: calendar, photos: .live)
             store.isLoaded = true
             return store
         }

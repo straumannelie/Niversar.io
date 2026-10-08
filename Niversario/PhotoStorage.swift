@@ -1,12 +1,20 @@
 import BirthdayKit
+import CoreGraphics
 import Foundation
 
 nonisolated struct PhotoStorage: Sendable {
-    static let live = PhotoStorage(
-        directory: URL.applicationSupportDirectory
+    static let live = PhotoStorage(directory: liveDirectory)
+
+    private static var liveDirectory: URL {
+        #if DEBUG
+            if LaunchOptions.isDemo {
+                return URL.temporaryDirectory.appending(path: "NiversarioDemo/Photos", directoryHint: .isDirectory)
+            }
+        #endif
+        return URL.applicationSupportDirectory
             .appending(path: "Niversario", directoryHint: .isDirectory)
             .appending(path: "Photos", directoryHint: .isDirectory)
-    )
+    }
 
     let directory: URL
 
@@ -33,6 +41,12 @@ nonisolated struct PhotoStorage: Sendable {
         let fileNames =
             (try? FileManager.default.contentsOfDirectory(atPath: directory.path(percentEncoded: false))) ?? []
         return Set(fileNames.filter(PhotoFileName.isValid))
+    }
+
+    @concurrent
+    func thumbnail(_ fileName: String, shortSidePixelSize: Int) async -> CGImage? {
+        guard let data = await loadPhotoData(fileName) else { return nil }
+        return try? PhotoResizer.thumbnail(from: data, shortSidePixelSize: shortSidePixelSize)
     }
 
     func delete(_ fileName: String) {
