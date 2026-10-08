@@ -3,7 +3,10 @@ import PhotosUI
 import SwiftUI
 
 struct BirthdayFormView: View {
-    private static let suggestedEmojis = ["🎂", "🎁", "🌸", "⭐️", "🔥", "💜", "🐶", "🌍", "🎸", "⚽️", "☕️", "🍕"]
+    private static let emojiChoices = [
+        "🎂", "🎁", "🎈", "🥳", "🌸", "🌻", "🌈", "🦋", "🐶", "🐱", "🌊", "🌍",
+        "⭐️", "🔥", "💜", "🎸", "🎨", "📚", "🎮", "⚽️", "✈️", "☕️", "🍕", "🍷",
+    ]
 
     private let editedBirthday: Birthday?
     private let onSave: (Birthday) -> Void
@@ -16,7 +19,7 @@ struct BirthdayFormView: View {
     @State private var day: Int
     @State private var month: Int
     @State private var year: Int?
-    @State private var emoji: String
+    @State private var emoji: String?
     @State private var color: PastelColor
     @State private var isColorChosen: Bool
     @State private var note: String
@@ -39,7 +42,7 @@ struct BirthdayFormView: View {
             day: birthday?.birthDate.day ?? calendar.component(.day, from: today),
             month: initialMonth,
             year: birthday?.birthDate.year,
-            emoji: birthday?.emoji ?? "",
+            emoji: birthday?.emoji,
             color: birthday?.color ?? PastelColor(month: initialMonth) ?? .rose,
             note: birthday?.note ?? "",
             photoFileName: birthday?.photoFileName
@@ -83,18 +86,21 @@ struct BirthdayFormView: View {
         BirthDate(day: day, month: month, year: year)
     }
 
-    private var emojiInput: FieldInput<String> {
-        FieldInput(emoji, parse: Birthday.singleEmoji)
+    private var displayedEmojis: [String] {
+        guard let initialEmoji = initialContent.emoji, !Self.emojiChoices.contains(initialEmoji) else {
+            return Self.emojiChoices
+        }
+        return [initialEmoji] + Self.emojiChoices
     }
 
     private var birthday: Birthday? {
-        guard let birthDate, !emojiInput.isInvalid, !isProcessingPhoto else { return nil }
+        guard let birthDate, !isProcessingPhoto else { return nil }
         return Birthday(
             id: editedBirthday?.id ?? UUID(),
             firstName: firstName,
             birthDate: birthDate,
             color: color,
-            emoji: emojiInput.value,
+            emoji: emoji,
             nickname: nickname,
             note: note,
             photoFileName: photoFileName
@@ -151,15 +157,11 @@ struct BirthdayFormView: View {
                 .listRowBackground(Color.appSurface)
 
                 Section {
-                    emojiSuggestions
-                    TextField("Autre emoji", text: $emoji)
-                        .focused($focusedField, equals: .emoji)
+                    emojiGrid
                 } header: {
                     Text("Emoji")
                 } footer: {
-                    if emojiInput.isInvalid {
-                        errorText("Un seul emoji, par exemple 🎂.")
-                    }
+                    Text("Sans choix, c'est 🎂 qui s'affiche.")
                 }
                 .listRowBackground(Color.appSurface)
 
@@ -276,28 +278,30 @@ struct BirthdayFormView: View {
         }
     }
 
-    private var emojiSuggestions: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(Self.suggestedEmojis, id: \.self) { suggestion in
-                    Button {
-                        emoji = emojiInput.value == suggestion ? "" : suggestion
-                    } label: {
-                        Text(suggestion)
-                            .font(.title2)
-                            .padding(6)
-                            .background {
-                                if emojiInput.value == suggestion {
-                                    Circle().fill(Color.appSurfaceElevated)
-                                }
+    private var emojiGrid: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 6), spacing: 8) {
+            ForEach(displayedEmojis, id: \.self) { choice in
+                let isSelected = emoji == choice
+                Button {
+                    emoji = isSelected ? nil : choice
+                } label: {
+                    Text(choice)
+                        .font(.title2)
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .overlay {
+                            if isSelected {
+                                Circle()
+                                    .stroke(Color.accentColor, lineWidth: 2.5)
+                                    .frame(width: 46, height: 46)
                             }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(emojiInput.value == suggestion ? .isSelected : [])
+                        }
+                        .contentShape(.rect)
                 }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
-        .scrollIndicators(.hidden)
+        .padding(.vertical, 4)
     }
 
     private var colorPicker: some View {
@@ -359,7 +363,7 @@ private struct FormContent: Equatable {
     let day: Int
     let month: Int
     let year: Int?
-    let emoji: String
+    let emoji: String?
     let color: PastelColor
     let note: String
     let photoFileName: String?
@@ -368,6 +372,5 @@ private struct FormContent: Equatable {
 private enum TextFieldID: Hashable {
     case firstName
     case nickname
-    case emoji
     case note
 }
