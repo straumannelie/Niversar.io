@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var pendingImport: [Birthday]?
     @State private var importMessage: StorageAlert?
     @Namespace private var zoomNamespace
+    @ScaledMetric(relativeTo: .largeTitle) private var titleCakeSize = 38.0
     #if DEBUG
         @State private var isShowingScheduledReminders = false
         @State private var debugEditedBirthday: Birthday?
@@ -211,15 +212,22 @@ struct ContentView: View {
     }
 
     private var title: some View {
-        Text("Niversar.io")
-            .font(.largeTitle.bold())
-            .foregroundStyle(Color.textPrimary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            #if DEBUG
-                .onLongPressGesture {
-                    isShowingScheduledReminders = true
-                }
-            #endif
+        HStack(spacing: 10) {
+            Image(.titleCake)
+                .resizable()
+                .scaledToFit()
+                .frame(width: titleCakeSize, height: titleCakeSize)
+                .accessibilityHidden(true)
+            Text("Niversar.io")
+                .font(.largeTitle.bold())
+                .foregroundStyle(Color.textPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        #if DEBUG
+            .onLongPressGesture {
+                isShowingScheduledReminders = true
+            }
+        #endif
     }
 
     private var reminderInputs: ReminderInputs {
