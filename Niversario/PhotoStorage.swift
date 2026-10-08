@@ -1,5 +1,4 @@
 import BirthdayKit
-import CoreGraphics
 import Foundation
 
 nonisolated struct PhotoStorage: Sendable {
@@ -41,12 +40,6 @@ nonisolated struct PhotoStorage: Sendable {
         let fileNames =
             (try? FileManager.default.contentsOfDirectory(atPath: directory.path(percentEncoded: false))) ?? []
         return Set(fileNames.filter(PhotoFileName.isValid))
-    }
-
-    @concurrent
-    func thumbnail(_ fileName: String, shortSidePixelSize: Int) async -> CGImage? {
-        guard let data = await loadPhotoData(fileName) else { return nil }
-        return try? PhotoResizer.thumbnail(from: data, shortSidePixelSize: shortSidePixelSize)
     }
 
     func delete(_ fileName: String) {

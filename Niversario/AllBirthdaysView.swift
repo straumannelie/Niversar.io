@@ -11,7 +11,7 @@ struct AllBirthdaysView: View {
     @State private var presentedBirthday: PresentedBirthday?
     @State private var birthdayPendingDeletion: Birthday?
     @Namespace private var zoomNamespace
-    @ScaledMetric(relativeTo: .body) private var avatarSize = 44.0
+    @ScaledMetric(relativeTo: .title2) private var emojiCircleSize = 44.0
 
     private static var initialQuery: String {
         #if DEBUG
@@ -86,7 +86,11 @@ struct AllBirthdaysView: View {
             presentedBirthday = PresentedBirthday(id: upcoming.id, source: .row(upcoming.id))
         } label: {
             HStack(spacing: 12) {
-                PhotoAvatar(birthday: upcoming.birthday, diameter: avatarSize)
+                Text(upcoming.birthday.emoji ?? "🎂")
+                    .font(.title2)
+                    .frame(width: emojiCircleSize, height: emojiCircleSize)
+                    .background(Color(upcoming.birthday.color), in: .circle)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(upcoming.birthday.firstName)

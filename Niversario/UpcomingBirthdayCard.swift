@@ -5,7 +5,7 @@ struct UpcomingBirthdayCard: View {
     let upcoming: UpcomingBirthday
 
     @ScaledMetric private var dotSize = 12.0
-    @ScaledMetric(relativeTo: .title) private var avatarSize = 52.0
+    @ScaledMetric(relativeTo: .title) private var emojiCircleSize = 52.0
 
     private var pastel: Color {
         Color(upcoming.birthday.color)
@@ -16,8 +16,11 @@ struct UpcomingBirthdayCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            PhotoAvatar(birthday: upcoming.birthday, diameter: avatarSize)
+        HStack(spacing: 16) {
+            Text(upcoming.birthday.emoji ?? "🎂")
+                .font(.title)
+                .frame(width: emojiCircleSize, height: emojiCircleSize)
+                .background(pastel, in: .circle)
             VStack(alignment: .leading, spacing: 4) {
                 Text(upcoming.birthday.firstName)
                     .font(.title3.bold())
@@ -26,16 +29,11 @@ struct UpcomingBirthdayCard: View {
                     .font(.subheadline)
                     .foregroundStyle(Color.textSecondary)
             }
-            .layoutPriority(1)
-            Spacer(minLength: 0)
-            HStack(spacing: 8) {
-                Text(upcoming.birthday.emoji ?? "🎂")
-                    .font(.title3)
-                Circle()
-                    .fill(Color(upcoming.birthday.color))
-                    .frame(width: dotSize, height: dotSize)
-                    .accessibilityHidden(true)
-            }
+            Spacer()
+            Circle()
+                .fill(Color(upcoming.birthday.color))
+                .frame(width: dotSize, height: dotSize)
+                .accessibilityHidden(true)
         }
         .padding()
         .background {

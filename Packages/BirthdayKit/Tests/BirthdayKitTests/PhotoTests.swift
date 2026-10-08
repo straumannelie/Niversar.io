@@ -22,32 +22,6 @@ struct PhotoTests {
         #expect(image.height == expectedHeight)
     }
 
-    @Test(
-        "Miniature : petit côté à la taille demandée, sans agrandissement",
-        arguments: [
-            (1200, 800, 150, 225, 150),
-            (800, 1200, 150, 150, 225),
-            (1200, 1200, 156, 156, 156),
-            (1200, 900, 132, 176, 132),
-            (100, 80, 150, 100, 80),
-        ]
-    )
-    func thumbnail(width: Int, height: Int, shortSide: Int, expectedWidth: Int, expectedHeight: Int) throws {
-        let jpeg = try PhotoResizer.resizedJPEG(from: try Self.pngImage(width: width, height: height))
-
-        let thumbnail = try PhotoResizer.thumbnail(from: jpeg, shortSidePixelSize: shortSide)
-
-        #expect(thumbnail.width == expectedWidth)
-        #expect(thumbnail.height == expectedHeight)
-    }
-
-    @Test("Miniature de données qui ne sont pas une image : erreur")
-    func unreadableThumbnail() {
-        #expect(throws: PhotoResizerError.unreadableImage) {
-            try PhotoResizer.thumbnail(from: Data("pas une image".utf8), shortSidePixelSize: 150)
-        }
-    }
-
     @Test("Données qui ne sont pas une image : erreur")
     func unreadableImage() {
         #expect(throws: PhotoResizerError.unreadableImage) {
