@@ -31,7 +31,15 @@ struct BirthdayCalendar: View {
         self.todayDay = todayDay
         self.zoomNamespace = zoomNamespace
         self.onSelectDay = onSelectDay
-        _visibleMonth = State(initialValue: currentMonth)
+        _visibleMonth = State(initialValue: currentMonth.adding(months: Self.initialMonthOffset))
+    }
+
+    private static var initialMonthOffset: Int {
+        #if DEBUG
+            LaunchOptions.monthOffset
+        #else
+            0
+        #endif
     }
 
     var body: some View {
@@ -64,10 +72,13 @@ struct BirthdayCalendar: View {
         }
         .overlay(alignment: .topTrailing) {
             if let visibleMonth, visibleMonth != currentMonth {
-                Button("Aujourd'hui") {
+                Button {
                     withAnimation {
                         self.visibleMonth = currentMonth
                     }
+                } label: {
+                    Label("Aujourd'hui", systemImage: "calendar")
+                        .foregroundStyle(Color("AccentColor"))
                 }
                 .buttonStyle(.glass)
                 .controlSize(.small)

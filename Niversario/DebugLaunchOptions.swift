@@ -14,6 +14,10 @@
             ProcessInfo.processInfo.arguments.contains("-demo")
         }
 
+        static var monthOffset: Int {
+            UserDefaults.standard.integer(forKey: "monthOffset")
+        }
+
         static var screen: DebugScreen? {
             UserDefaults.standard.string(forKey: "screen").flatMap(DebugScreen.init(rawValue:))
         }
