@@ -26,6 +26,7 @@ struct BirthdayFormView: View {
     @State private var photoError: String?
     @State private var createdPhotoFileNames: [String] = []
     @State private var isConfirmingDiscard = false
+    @FocusState private var focusedField: TextFieldID?
 
     init(editing birthday: Birthday? = nil, today: Date, calendar: Calendar, onSave: @escaping (Birthday) -> Void) {
         editedBirthday = birthday
@@ -114,6 +115,7 @@ struct BirthdayFormView: View {
 
                 Section("Prénom") {
                     TextField("Prénom", text: $firstName)
+                        .focused($focusedField, equals: .firstName)
                         .textContentType(.givenName)
                         .submitLabel(.done)
                 }
@@ -132,6 +134,7 @@ struct BirthdayFormView: View {
 
                 Section("Surnom") {
                     TextField("Surnom (facultatif)", text: $nickname)
+                        .focused($focusedField, equals: .nickname)
                         .submitLabel(.done)
                 }
                 .listRowBackground(Color.appSurface)
@@ -150,6 +153,7 @@ struct BirthdayFormView: View {
                 Section {
                     emojiSuggestions
                     TextField("Autre emoji", text: $emoji)
+                        .focused($focusedField, equals: .emoji)
                 } header: {
                     Text("Emoji")
                 } footer: {
@@ -166,17 +170,19 @@ struct BirthdayFormView: View {
 
                 Section("Note") {
                     TextField("Idées cadeaux, goûts, souvenirs…", text: $note, axis: .vertical)
+                        .focused($focusedField, equals: .note)
                         .lineLimit(3...8)
                 }
                 .listRowBackground(Color.appSurface)
             }
             .scrollContentBackground(.hidden)
+            .scrollDismissesKeyboard(.immediately)
             .background(Color.appBackground)
             .navigationTitle(isEditing ? "Modifier" : "Nouvel anniversaire")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel, action: cancel)
+                    Button("Annuler", role: .cancel, action: cancel)
                         .confirmationDialog(
                             "Abandonner les modifications ?",
                             isPresented: $isConfirmingDiscard,
@@ -187,12 +193,20 @@ struct BirthdayFormView: View {
                         }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? "Enregistrer" : "Ajouter 🎉", action: save)
-                        .buttonStyle(.glassProminent)
-                        .tint(Color.accentColor)
-                        .disabled(birthday == nil)
+                    Button(action: save) {
+                        Text(isEditing ? "Enregistrer" : "Ajouter")
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(Color.accentColor)
+                    .disabled(birthday == nil)
                 }
                 .sharedBackgroundVisibility(.hidden)
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("OK") {
+                        focusedField = nil
+                    }
+                }
             }
             .onChange(of: photoItem) {
                 guard let photoItem else { return }
@@ -349,4 +363,11 @@ private struct FormContent: Equatable {
     let color: PastelColor
     let note: String
     let photoFileName: String?
+}
+
+private enum TextFieldID: Hashable {
+    case firstName
+    case nickname
+    case emoji
+    case note
 }
