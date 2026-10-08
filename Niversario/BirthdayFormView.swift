@@ -197,12 +197,13 @@ struct BirthdayFormView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: save) {
                         Text(isEditing ? "Enregistrer" : "Ajouter")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(birthday == nil ? Color.textSecondary : Color.appBackground)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(Color.accentColor)
+                    .tint(Color("AccentColor").opacity(birthday == nil ? 0.25 : 1))
                     .disabled(birthday == nil)
                 }
-                .sharedBackgroundVisibility(.hidden)
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("OK") {
