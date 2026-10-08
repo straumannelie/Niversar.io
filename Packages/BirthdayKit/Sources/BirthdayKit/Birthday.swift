@@ -8,7 +8,6 @@ public struct Birthday: Identifiable, Sendable, Hashable {
     public private(set) var emoji: String?
     public private(set) var nickname: String?
     public private(set) var note: String?
-    public var instagram: InstagramHandle?
     public private(set) var photoFileName: String?
 
     public init?(
@@ -19,7 +18,6 @@ public struct Birthday: Identifiable, Sendable, Hashable {
         emoji: String? = nil,
         nickname: String? = nil,
         note: String? = nil,
-        instagram: InstagramHandle? = nil,
         photoFileName: String? = nil
     ) {
         guard let normalizedFirstName = Self.normalizedFirstName(firstName) else { return nil }
@@ -38,7 +36,6 @@ public struct Birthday: Identifiable, Sendable, Hashable {
         self.emoji = normalizedEmoji
         self.nickname = nickname.flatMap(Self.normalizedText)
         self.note = note.flatMap(Self.normalizedText)
-        self.instagram = instagram
         self.photoFileName = normalizedPhotoFileName
     }
 
@@ -75,7 +72,6 @@ extension Birthday: Codable {
         case emoji
         case nickname
         case note
-        case instagram
         case photoFileName
     }
 
@@ -89,7 +85,6 @@ extension Birthday: Codable {
             emoji: try container.decodeIfPresent(String.self, forKey: .emoji),
             nickname: try container.decodeIfPresent(String.self, forKey: .nickname),
             note: try container.decodeIfPresent(String.self, forKey: .note),
-            instagram: try container.decodeIfPresent(InstagramHandle.self, forKey: .instagram),
             photoFileName: try container.decodeIfPresent(String.self, forKey: .photoFileName)
         )
         guard let birthday else {

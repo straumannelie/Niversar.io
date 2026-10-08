@@ -18,7 +18,6 @@ struct BirthdayFormView: View {
     @State private var emoji: String
     @State private var color: PastelColor
     @State private var isColorChosen: Bool
-    @State private var instagram: String
     @State private var note: String
     @State private var photoFileName: String?
     @State private var photoItem: PhotosPickerItem?
@@ -39,7 +38,6 @@ struct BirthdayFormView: View {
         _emoji = State(initialValue: birthday?.emoji ?? "")
         _color = State(initialValue: birthday?.color ?? PastelColor(month: initialMonth) ?? .rose)
         _isColorChosen = State(initialValue: birthday != nil)
-        _instagram = State(initialValue: birthday?.instagram?.username ?? "")
         _note = State(initialValue: birthday?.note ?? "")
         _photoFileName = State(initialValue: birthday?.photoFileName)
     }
@@ -56,12 +54,8 @@ struct BirthdayFormView: View {
         FieldInput(emoji, parse: Birthday.singleEmoji)
     }
 
-    private var instagramInput: FieldInput<InstagramHandle> {
-        FieldInput(instagram, parse: InstagramHandle.init)
-    }
-
     private var birthday: Birthday? {
-        guard let birthDate, !emojiInput.isInvalid, !instagramInput.isInvalid, !isProcessingPhoto else { return nil }
+        guard let birthDate, !emojiInput.isInvalid, !isProcessingPhoto else { return nil }
         return Birthday(
             id: editedBirthday?.id ?? UUID(),
             firstName: firstName,
@@ -70,7 +64,6 @@ struct BirthdayFormView: View {
             emoji: emojiInput.value,
             nickname: nickname,
             note: note,
-            instagram: instagramInput.value,
             photoFileName: photoFileName
         )
     }
@@ -136,20 +129,6 @@ struct BirthdayFormView: View {
 
                 Section("Couleur") {
                     colorPicker
-                }
-                .listRowBackground(Color.appSurface)
-
-                Section {
-                    TextField("Pseudo ou lien du profil", text: $instagram)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .keyboardType(.URL)
-                } header: {
-                    Text("Instagram")
-                } footer: {
-                    if instagramInput.isInvalid {
-                        errorText("Pseudo invalide : lettres, chiffres, point et tiret bas, 30 caractères au maximum.")
-                    }
                 }
                 .listRowBackground(Color.appSurface)
 

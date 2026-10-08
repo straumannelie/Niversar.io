@@ -1,6 +1,5 @@
 import BirthdayKit
 import SwiftUI
-import UIKit
 
 struct PresentedBirthday: Identifiable, Hashable {
     let id: UUID
@@ -54,9 +53,6 @@ struct BirthdayDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     if let note = birthday.note {
                         noteCard(note)
-                    }
-                    if let instagram = birthday.instagram {
-                        instagramLink(instagram)
                     }
                     Button {
                         isEditing = true
@@ -160,30 +156,6 @@ struct BirthdayDetailView: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.appSurface, in: .rect(cornerRadius: 16))
-    }
-
-    private func instagramLink(_ instagram: InstagramHandle) -> some View {
-        Button {
-            Task { await openInInstagramApp(instagram.profileURL) }
-        } label: {
-            HStack {
-                Label("@\(instagram.username)", systemImage: "camera")
-                Spacer()
-                Image(systemName: "arrow.up.right")
-                    .foregroundStyle(Color.textSecondary)
-                    .accessibilityHidden(true)
-            }
-            .padding()
-            .background(Color.appSurface, in: .rect(cornerRadius: 16))
-        }
-        .accessibilityHint("Ouvre le profil Instagram")
-    }
-
-    private func openInInstagramApp(_ url: URL) async {
-        let openedInApp = await UIApplication.shared.open(url, options: [.universalLinksOnly: true])
-        if !openedInApp {
-            _ = await UIApplication.shared.open(url)
-        }
     }
 }
 

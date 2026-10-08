@@ -57,7 +57,7 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 - Année de naissance facultative : pas d'âge affiché si elle est inconnue.
 - Né un 29 février : fêté le 28 février les années non bissextiles.
 - Suppression toujours confirmée.
-- Modèle Birthday : id, prénom, jour, mois, année (optionnelle), couleur, emoji, surnom, photo, instagram, note (tous optionnels sauf id, prénom, jour, mois, couleur).
+- Modèle Birthday : id, prénom, jour, mois, année (optionnelle), couleur, emoji, surnom, photo, note (tous optionnels sauf id, prénom, jour, mois, couleur).
 - Phrases de notification (tirées au hasard) :
   - « 🎉🥳 C'est l'anniversaire de [Prénom] [Emoji] aujourd'hui ! »
   - « 🎉🥳 [Prénom] [Emoji] souffle ses bougies aujourd'hui, pense à lui écrire ! »
@@ -79,5 +79,5 @@ Hybride : composants natifs iOS 26 (Liquid Glass sur barres et boutons flottants
   `#FFB3B3` `#FFD4A3` `#FFF0A3` `#B3F0B3` `#A3D4FF` `#C4B3FF` `#FFB3E6` `#B3FFF0` `#FFB3C6` `#D4FFB3` `#B3C6FF` `#FFE0B3`
 - Police système uniquement, en styles dynamiques (pas de tailles en points fixes).
 - Écran principal : 2 prochains anniversaires en cartes, puis calendrier mensuel à défilement horizontal (nom du mois dans sa couleur pastel, numéros de jours uniquement, jour actuel en cercle accent atténué).
-- Fiche personne façon Hinge : photo pleine largeur (ou initiale sur fond surface), bandeau sombre en bas avec barre pastel, prénom, badge âge et date, surnom, badge « Dans X jours » ; puis note, Instagram, Modifier, Supprimer.
+- Fiche personne façon Hinge : photo pleine largeur (ou initiale sur fond surface), bandeau sombre en bas avec barre pastel, prénom, badge âge et date, surnom, badge « Dans X jours » ; puis note, Modifier, Supprimer.
 - Ton des textes : chaleureux et léger (« C'est qui la prochaine star du gâteau ? 🎂 »).

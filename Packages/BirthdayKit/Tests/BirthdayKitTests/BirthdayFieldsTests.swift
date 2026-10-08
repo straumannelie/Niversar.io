@@ -65,45 +65,10 @@ struct BirthdayFieldsTests {
         #expect(Birthday.singleEmoji(text) == nil)
     }
 
-    @Test(
-        "Instagram : pseudo extrait",
-        arguments: [
-            ("pseudo", "pseudo"),
-            ("@pseudo", "pseudo"),
-            ("  @pseudo  ", "pseudo"),
-            ("Pseudo.Test_1", "pseudo.test_1"),
-            ("instagram.com/pseudo", "pseudo"),
-            ("www.instagram.com/pseudo", "pseudo"),
-            ("https://instagram.com/pseudo", "pseudo"),
-            ("https://www.instagram.com/pseudo/", "pseudo"),
-            ("http://instagram.com/pseudo?igsh=abc123&utm_source=qr", "pseudo"),
-            ("https://www.Instagram.com/Pseudo/?hl=fr", "pseudo"),
-            ("abcdefghijklmnopqrstuvwxyz1234", "abcdefghijklmnopqrstuvwxyz1234"),
-        ]
-    )
-    func instagramUsernameIsExtracted(input: String, expected: String) throws {
-        let handle = try #require(InstagramHandle(input))
-
-        #expect(handle.username == expected)
-        #expect(handle.profileURL.absoluteString == "https://www.instagram.com/\(expected)/")
-    }
-
-    @Test(
-        "Instagram : entrée refusée",
-        arguments: [
-            "", "@", "pseudo avec espace", "pseudo!", "pseudo-tiret", "élodie", "abcdefghijklmnopqrstuvwxyz12345",
-            "https://example.com/pseudo", "https://instagram.com/", "instagram.com/p/abc123", "https://instagram.com",
-        ]
-    )
-    func invalidInstagramIsRejected(input: String) {
-        #expect(InstagramHandle(input) == nil)
-    }
-
     @Test("Champ de saisie : vide, valide ou invalide")
     func fieldInput() {
-        #expect(FieldInput("  ", parse: InstagramHandle.init) == .empty)
-        #expect(FieldInput("@pseudo", parse: InstagramHandle.init).value?.username == "pseudo")
-        #expect(FieldInput("pseudo!", parse: InstagramHandle.init).isInvalid)
+        #expect(FieldInput("  ", parse: Birthday.singleEmoji) == .empty)
+        #expect(FieldInput(" 🎂 ", parse: Birthday.singleEmoji).value == "🎂")
         #expect(FieldInput("🎂", parse: Birthday.singleEmoji) == .valid("🎂"))
         #expect(FieldInput("ab", parse: Birthday.singleEmoji) == .invalid)
         #expect(!FieldInput("", parse: Birthday.singleEmoji).isInvalid)
@@ -136,7 +101,6 @@ struct BirthdayFieldsTests {
                 emoji: "👍🏽",
                 nickname: "Zozo",
                 note: "Aime le chocolat.",
-                instagram: InstagramHandle("@zoe.test"),
                 photoFileName: Self.photoFileName
             )
         )
@@ -168,7 +132,6 @@ struct BirthdayFieldsTests {
         #expect(zoe.emoji == "🌸")
         #expect(zoe.nickname == nil)
         #expect(zoe.note == nil)
-        #expect(zoe.instagram == nil)
         #expect(zoe.photoFileName == nil)
         #expect(try BirthdayArchive(data: Data(contentsOf: fileURL)).version == 1)
         #expect(try repository.load() == birthdays)
@@ -176,7 +139,7 @@ struct BirthdayFieldsTests {
 
     @Test(
         "Fichier avec un champ invalide : erreur explicite",
-        arguments: [#""emoji":"ab""#, #""instagram":"pseudo!""#, #""photoFileName":"../x.jpg""#]
+        arguments: [#""emoji":"ab""#, #""photoFileName":"../x.jpg""#]
     )
     func invalidFieldInFile(field: String) {
         let json = """
@@ -187,5 +150,31 @@ struct BirthdayFieldsTests {
         #expect(throws: BirthdayArchiveError.invalidContent) {
             try BirthdayArchive(data: Data(json.utf8))
         }
+    }
+
+    @Test(
+        "Un fichier v1 avec un ancien champ instagram se lit, le champ disparaît à la prochaine écriture",
+        arguments: ["zoe.test", "pseudo invalide !"]
+    )
+    func ignoresLegacyInstagramField(instagram: String) throws {
+        let json = """
+            {"version":1,"birthdays":[{"id":"8B9C0C4E-6F4B-4C8E-9C3A-2D1E5F6A7B8C","firstName":"Zoé",\
+            "birthDate":{"day":3,"month":5,"year":1990},"color":"sky","instagram":"\(instagram)"}]}
+            """
+        let directory = FileManager.default.temporaryDirectory.appending(path: "BirthdayKitTests-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let fileURL = directory.appending(path: "birthdays.json")
+        try Data(json.utf8).write(to: fileURL)
+        let repository = BirthdayFileRepository(fileURL: fileURL)
+
+        let birthdays = try repository.load()
+        try repository.save(birthdays)
+
+        let rewritten = try String(contentsOf: fileURL, encoding: .utf8)
+        #expect(birthdays.map(\.firstName) == ["Zoé"])
+        #expect(!rewritten.contains("instagram"))
+        #expect(try BirthdayArchive(data: Data(contentsOf: fileURL)).version == 1)
+        #expect(try repository.load() == birthdays)
     }
 }
