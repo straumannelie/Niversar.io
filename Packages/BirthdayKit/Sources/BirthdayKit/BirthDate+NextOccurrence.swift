@@ -18,6 +18,20 @@ extension BirthDate {
         return age >= 0 ? age : nil
     }
 
+    public func age(on today: Date, in calendar: Calendar) -> Int? {
+        guard let year else { return nil }
+        let currentYear = calendar.component(.year, from: today)
+        let todayMonthAndDay = (calendar.component(.month, from: today), calendar.component(.day, from: today))
+        let celebrated = celebratedMonthAndDay(in: currentYear)
+        let hasCelebratedThisYear = (celebrated.month, celebrated.day) <= todayMonthAndDay
+        let age = currentYear - year - (hasCelebratedThisYear ? 0 : 1)
+        return age >= 0 ? age : nil
+    }
+
+    public var dayTitle: String {
+        CalendarMonth.dayTitle(day: day, month: month)
+    }
+
     private func nextOccurrenceYear(from today: Date, in calendar: Calendar) -> Int {
         let currentYear = calendar.component(.year, from: today)
         let todayMonthAndDay = (calendar.component(.month, from: today), calendar.component(.day, from: today))

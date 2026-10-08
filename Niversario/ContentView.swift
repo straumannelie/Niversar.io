@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var today = Date.now
     @State private var isAddingBirthday = false
     @State private var selectedDay: SelectedDay?
+    @State private var presentedBirthday: PresentedBirthday?
     @State private var addedBirthdaysCount = 0
     #if DEBUG
         @State private var isShowingScheduledReminders = false
@@ -38,8 +39,13 @@ struct ContentView: View {
                         )
                     } else {
                         ForEach(nextBirthdays) { upcomingBirthday in
-                            UpcomingBirthdayCard(upcoming: upcomingBirthday)
-                                .padding(.horizontal)
+                            Button {
+                                presentedBirthday = PresentedBirthday(id: upcomingBirthday.id)
+                            } label: {
+                                UpcomingBirthdayCard(upcoming: upcomingBirthday)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal)
                         }
                     }
                     BirthdayCalendar(
@@ -47,7 +53,7 @@ struct ContentView: View {
                         currentMonth: CalendarMonth.containing(today, in: calendar),
                         todayDay: calendar.component(.day, from: today)
                     ) { day in
-                        selectedDay = day
+                        select(day)
                     }
                 }
                 .padding(.vertical)
@@ -74,6 +80,9 @@ struct ContentView: View {
             }
             .sheet(item: $selectedDay) { day in
                 DayBirthdaysView(selectedDay: day, store: store, today: today, calendar: calendar)
+            }
+            .sheet(item: $presentedBirthday) { presented in
+                BirthdayDetailView(birthdayID: presented.id, store: store, today: today, calendar: calendar)
             }
             #if DEBUG
                 .sheet(isPresented: $isShowingScheduledReminders) {
@@ -103,6 +112,15 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             today = .now
+        }
+    }
+
+    private func select(_ day: SelectedDay) {
+        let people = day.month.birthdaysByDay(store.birthdays)[day.day] ?? []
+        if people.count == 1, let person = people.first {
+            presentedBirthday = PresentedBirthday(id: person.id)
+        } else {
+            selectedDay = day
         }
     }
 

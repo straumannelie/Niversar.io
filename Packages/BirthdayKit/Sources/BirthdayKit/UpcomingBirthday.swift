@@ -11,6 +11,10 @@ public struct UpcomingBirthday: Identifiable, Sendable, Hashable {
         Self.label(daysRemaining: daysRemaining, age: age)
     }
 
+    public var countdown: String {
+        Self.countdownLabel(daysRemaining: daysRemaining)
+    }
+
     init?(birthday: Birthday, today: Date, calendar: Calendar) {
         guard let daysRemaining = birthday.birthDate.daysUntilNextOccurrence(from: today, in: calendar) else {
             return nil
@@ -23,7 +27,11 @@ public struct UpcomingBirthday: Identifiable, Sendable, Hashable {
     public static func label(daysRemaining: Int, age: Int?) -> String {
         let countdown = countdownLabel(daysRemaining: daysRemaining)
         guard let age else { return countdown }
-        return "\(countdown) · \(age) \(age < 2 ? "an" : "ans")"
+        return "\(countdown) · \(ageLabel(age))"
+    }
+
+    public static func ageLabel(_ age: Int) -> String {
+        "\(age) \(age < 2 ? "an" : "ans")"
     }
 
     private static func countdownLabel(daysRemaining: Int) -> String {

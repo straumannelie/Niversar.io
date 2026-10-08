@@ -145,3 +145,41 @@ struct NextOccurrenceTests {
         #expect(birthDate.ageAtNextOccurrence(from: try lisbon.date(Day(2026, 6, 15)), in: lisbon.calendar) == nil)
     }
 }
+
+struct CurrentAgeTests {
+    @Test(
+        "Âge actuel",
+        arguments: [
+            (Day(2026, 6, 14), 15, 6, 1990, 35),
+            (Day(2026, 6, 15), 15, 6, 1990, 36),
+            (Day(2026, 6, 16), 15, 6, 1990, 36),
+            (Day(2026, 12, 31), 1, 1, 2000, 26),
+            (Day(2027, 1, 1), 1, 1, 2000, 27),
+            (Day(2027, 2, 28), 29, 2, 2000, 27),
+            (Day(2027, 2, 27), 29, 2, 2000, 26),
+            (Day(2028, 2, 28), 29, 2, 2000, 27),
+            (Day(2028, 2, 29), 29, 2, 2000, 28),
+            (Day(2026, 6, 15), 15, 6, 2026, 0),
+        ]
+    )
+    func currentAge(today: Day, birthDay: Int, birthMonth: Int, birthYear: Int, expectedAge: Int) throws {
+        let lisbon = try Lisbon()
+        let birthDate = try birthDate(birthDay, birthMonth, birthYear)
+
+        #expect(birthDate.age(on: try lisbon.date(today), in: lisbon.calendar) == expectedAge)
+    }
+
+    @Test("Pas d'âge actuel si l'année est inconnue ou dans le futur", arguments: [nil, 2030] as [Int?])
+    func noCurrentAge(year: Int?) throws {
+        let lisbon = try Lisbon()
+        let birthDate = try birthDate(15, 6, year)
+
+        #expect(birthDate.age(on: try lisbon.date(Day(2026, 6, 15)), in: lisbon.calendar) == nil)
+    }
+
+    @Test(
+        "Date de naissance en titre", arguments: [(1, 1, "1er janvier"), (12, 10, "12 octobre"), (29, 2, "29 février")])
+    func dayTitle(day: Int, month: Int, expected: String) throws {
+        #expect(try birthDate(day, month).dayTitle == expected)
+    }
+}

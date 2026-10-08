@@ -66,7 +66,12 @@ public struct CalendarMonth: Sendable, Hashable, Comparable {
     }
 
     public func dayTitle(_ day: Int) -> String {
-        "\(day == 1 ? "1er" : String(day)) \(name.lowercased())"
+        Self.dayTitle(day: day, month: month)
+    }
+
+    static func dayTitle(day: Int, month: Int) -> String {
+        let monthName = names.indices.contains(month - 1) ? names[month - 1] : ""
+        return "\(day == 1 ? "1er" : String(day)) \(monthName.lowercased())"
     }
 
     public func birthdayAccessibilityLabel(day: Int, firstNames: [String]) -> String {

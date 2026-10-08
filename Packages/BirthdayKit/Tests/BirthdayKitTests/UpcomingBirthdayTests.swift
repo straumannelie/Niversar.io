@@ -59,3 +59,25 @@ struct UpcomingBirthdayTests {
         #expect(UpcomingBirthday.label(daysRemaining: daysRemaining, age: age) == expected)
     }
 }
+
+struct CountdownTests {
+    @Test(
+        "Compte à rebours seul",
+        arguments: [(0, "Aujourd'hui"), (1, "Demain"), (2, "Dans 2 jours"), (300, "Dans 300 jours")])
+    func countdown(daysRemaining: Int, expected: String) throws {
+        let lisbon = try Lisbon()
+        let today = try lisbon.date(Day(2026, 1, 1))
+        let date = try #require(lisbon.calendar.date(byAdding: .day, value: daysRemaining, to: today))
+        let day = lisbon.day(of: date)
+        let person = try birthday("Zoé", birthDate(day.day, day.month))
+
+        let upcoming = try #require([person].upcoming(limit: 1, from: today, in: lisbon.calendar).first)
+
+        #expect(upcoming.countdown == expected)
+    }
+
+    @Test("Âge seul", arguments: [(0, "0 an"), (1, "1 an"), (2, "2 ans"), (36, "36 ans")])
+    func ageLabel(age: Int, expected: String) {
+        #expect(UpcomingBirthday.ageLabel(age) == expected)
+    }
+}

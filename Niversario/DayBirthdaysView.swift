@@ -9,7 +9,7 @@ struct DayBirthdaysView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var birthdayPendingDeletion: Birthday?
-    @State private var birthdayBeingEdited: Birthday?
+    @State private var presentedBirthday: PresentedBirthday?
 
     var body: some View {
         let people = selectedDay.month.birthdaysByDay(store.birthdays)[selectedDay.day] ?? []
@@ -19,7 +19,7 @@ struct DayBirthdaysView: View {
             List {
                 ForEach(upcoming) { upcomingBirthday in
                     Button {
-                        birthdayBeingEdited = upcomingBirthday.birthday
+                        presentedBirthday = PresentedBirthday(id: upcomingBirthday.id)
                     } label: {
                         BirthdayRow(upcoming: upcomingBirthday)
                     }
@@ -45,10 +45,8 @@ struct DayBirthdaysView: View {
                     }
                 }
             }
-            .sheet(item: $birthdayBeingEdited) { birthday in
-                BirthdayFormView(editing: birthday, today: today, calendar: calendar) { editedBirthday in
-                    store.addOrReplace(editedBirthday)
-                }
+            .sheet(item: $presentedBirthday) { presented in
+                BirthdayDetailView(birthdayID: presented.id, store: store, today: today, calendar: calendar)
             }
             .alert(
                 deletionTitle,
