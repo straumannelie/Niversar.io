@@ -34,7 +34,7 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 ## Commandes
 - `scripts/check.sh` : formatage, lint strict, tests du package. Doit passer avant chaque commit.
 - `scripts/run-device.sh` : compile, installe et lance l'app sur l'iPhone.
-- `scripts/screenshot.sh [-demo] [-demoNoToday] [-screen form|edit|detail|day] [-monthOffset N]` : compile pour le simulateur, lance avec ces arguments (Debug uniquement) et enregistre une capture dans `build/screenshots/`.
+- `scripts/screenshot.sh [-demo] [-demoNoToday] [-screen form|edit|detail|day|settings] [-monthOffset N]` : compile pour le simulateur, lance avec ces arguments (Debug uniquement) et enregistre une capture dans `build/screenshots/`.
 
 ## Conventions de code
 - **Aucun commentaire dans le code.** Le code doit se lire seul : noms explicites, petites fonctions.
@@ -55,11 +55,11 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 
 ## Décisions produit
 - Saisie manuelle uniquement (pas d'accès aux Contacts).
-- Un seul rappel par personne : le jour J à 9h00.
+- Un seul rappel par personne : le jour J à l'heure choisie dans les Réglages (9h00 par défaut, enregistrée dans les préférences de l'app, pas dans birthdays.json).
 - Année de naissance facultative : pas d'âge affiché si elle est inconnue.
 - Né un 29 février : fêté le 28 février les années non bissextiles.
 - Suppression toujours confirmée.
-- Sauvegarde : export et import manuels d'un fichier JSON au format de l'app (menu « … »), photos non incluses. L'import fusionne par id et ne retire jamais une photo présente sur l'appareil.
+- Sauvegarde : export et import manuels d'un fichier JSON au format de l'app (écran Réglages), photos non incluses. L'import fusionne par id et ne retire jamais une photo présente sur l'appareil.
 - Modèle Birthday : id, prénom, jour, mois, année (optionnelle), couleur, emoji, surnom, photo, note (tous optionnels sauf id, prénom, jour, mois, couleur).
 - Phrases de notification (tirées au hasard) :
   - « 🎉🥳 C'est l'anniversaire de [Prénom] [Emoji] aujourd'hui ! »

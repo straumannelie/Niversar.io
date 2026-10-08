@@ -174,4 +174,54 @@ struct ReminderPlannerTests {
         #expect(plan.reminders.isEmpty)
         #expect(plan.unschedulable.isEmpty)
     }
+
+    @Test(
+        "Autre heure de rappel : jour J avant et après l'heure",
+        arguments: [
+            (7, 30, 7, 29, 2026),
+            (7, 30, 7, 30, 2027),
+            (7, 30, 8, 0, 2027),
+            (21, 0, 9, 0, 2026),
+            (21, 0, 20, 59, 2026),
+            (21, 0, 21, 0, 2027),
+            (21, 0, 22, 15, 2027),
+        ]
+    )
+    func customReminderTime(hour: Int, minute: Int, nowHour: Int, nowMinute: Int, expectedYear: Int) throws {
+        let lisbon = try Lisbon()
+        let now = try lisbon.date(Day(2026, 6, 15), hour: nowHour, minute: nowMinute)
+        let person = try birthday("Zoé", birthDate(15, 6))
+
+        let plan = ReminderPlanner.plan(
+            for: [person],
+            now: now,
+            calendar: lisbon.calendar,
+            time: TimeOfDay(hour: hour, minute: minute)
+        )
+
+        let reminder = try #require(plan.reminders.first)
+        #expect(
+            reminder.dateComponents
+                == DateComponents(year: expectedYear, month: 6, day: 15, hour: hour, minute: minute)
+        )
+        #expect(lisbon.calendar.component(.hour, from: reminder.date) == hour)
+        #expect(lisbon.calendar.component(.minute, from: reminder.date) == minute)
+        #expect(reminder.date > now)
+    }
+
+    @Test(
+        "Heure du rappel en minutes depuis minuit",
+        arguments: [(540, 9, 0), (450, 7, 30), (1260, 21, 0), (0, 0, 0), (1439, 23, 59), (1440, 0, 0), (-30, 23, 30)]
+    )
+    func timeOfDayFromMinutes(minutes: Int, expectedHour: Int, expectedMinute: Int) {
+        let time = TimeOfDay(minutesSinceMidnight: minutes)
+
+        #expect(time == TimeOfDay(hour: expectedHour, minute: expectedMinute))
+        #expect(TimeOfDay(minutesSinceMidnight: time.minutesSinceMidnight) == time)
+    }
+
+    @Test("Heure par défaut : 9h00")
+    func defaultTime() {
+        #expect(ReminderPlanner.defaultTime.minutesSinceMidnight == 540)
+    }
 }

@@ -35,21 +35,21 @@ final class ReminderScheduler {
         await refreshAuthorizationStatus()
     }
 
-    func reschedule(_ birthdays: [Birthday], now: Date) async {
+    func reschedule(_ birthdays: [Birthday], now: Date, time: TimeOfDay) async {
         let previous = rescheduling
         previous?.cancel()
         let task = Task {
             await previous?.value
-            await replacePendingReminders(with: birthdays, now: now)
+            await replacePendingReminders(with: birthdays, now: now, time: time)
         }
         rescheduling = task
         await task.value
     }
 
-    private func replacePendingReminders(with birthdays: [Birthday], now: Date) async {
+    private func replacePendingReminders(with birthdays: [Birthday], now: Date, time: TimeOfDay) async {
         guard !Task.isCancelled else { return }
         let center = UNUserNotificationCenter.current()
-        let plan = ReminderPlanner.plan(for: birthdays, now: now, calendar: calendar)
+        let plan = ReminderPlanner.plan(for: birthdays, now: now, calendar: calendar, time: time)
         unschedulableNames = plan.unschedulable.map(\.firstName)
 
         let pendingIdentifiers = await center.pendingNotificationRequests().map(\.identifier)

@@ -7,6 +7,7 @@
         case edit
         case detail
         case day
+        case settings
     }
 
     enum LaunchOptions {

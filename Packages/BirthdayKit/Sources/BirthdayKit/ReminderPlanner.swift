@@ -8,6 +8,16 @@ public struct TimeOfDay: Sendable, Hashable {
         self.hour = hour
         self.minute = minute
     }
+
+    public init(minutesSinceMidnight: Int) {
+        let minutesInDay = 24 * 60
+        let normalized = (minutesSinceMidnight % minutesInDay + minutesInDay) % minutesInDay
+        self.init(hour: normalized / 60, minute: normalized % 60)
+    }
+
+    public var minutesSinceMidnight: Int {
+        hour * 60 + minute
+    }
 }
 
 public struct Reminder: Identifiable, Sendable, Hashable {
