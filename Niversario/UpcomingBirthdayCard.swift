@@ -5,11 +5,22 @@ struct UpcomingBirthdayCard: View {
     let upcoming: UpcomingBirthday
 
     @ScaledMetric private var dotSize = 12.0
+    @ScaledMetric(relativeTo: .title) private var emojiCircleSize = 52.0
+
+    private var pastel: Color {
+        Color(upcoming.birthday.color)
+    }
+
+    private var isToday: Bool {
+        upcoming.daysRemaining == 0
+    }
 
     var body: some View {
         HStack(spacing: 16) {
             Text(upcoming.birthday.emoji ?? "🎂")
-                .font(.largeTitle)
+                .font(.title)
+                .frame(width: emojiCircleSize, height: emojiCircleSize)
+                .background(pastel, in: .circle)
             VStack(alignment: .leading, spacing: 4) {
                 Text(upcoming.birthday.firstName)
                     .font(.title3.bold())
@@ -25,9 +36,29 @@ struct UpcomingBirthdayCard: View {
                 .accessibilityHidden(true)
         }
         .padding()
-        .background(Color.appSurface, in: .rect(cornerRadius: 20))
+        .background {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.appSurface)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(pastel.opacity(0.12))
+                }
+        }
+        .overlay {
+            if isToday {
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(Color("AccentColor"), lineWidth: 1.5)
+            }
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(upcoming.accessibilityLabel)
+    }
+}
+
+extension View {
+    func birthdayTodayGlow(_ isActive: Bool) -> some View {
+        compositingGroup()
+            .shadow(color: isActive ? Color("AccentColor").opacity(0.5) : .clear, radius: 12)
     }
 }
 

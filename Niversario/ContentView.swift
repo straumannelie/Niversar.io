@@ -20,6 +20,8 @@ struct ContentView: View {
     @State private var importMessage: StorageAlert?
     @Namespace private var zoomNamespace
     @ScaledMetric(relativeTo: .largeTitle) private var titleCakeSize = 38.0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var titleCakeBounces = 0
     #if DEBUG
         @State private var isShowingScheduledReminders = false
         @State private var debugEditedBirthday: Birthday?
@@ -60,6 +62,7 @@ struct ContentView: View {
                             .matchedTransitionSource(id: ZoomSource.card(upcomingBirthday.id), in: zoomNamespace) {
                                 $0.clipShape(.rect(cornerRadius: 20))
                             }
+                            .birthdayTodayGlow(upcomingBirthday.daysRemaining == 0)
                             .padding(.horizontal)
                         }
                     }
@@ -103,6 +106,12 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .largeTitle) {
                     title
+                }
+                ToolbarItem(placement: .largeSubtitle) {
+                    Text(HomeTagline.text(for: store.birthdays, today: today, calendar: calendar))
+                        .font(.subheadline)
+                        .foregroundStyle(Color.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     backupMenu
@@ -152,6 +161,11 @@ struct ContentView: View {
             Text(alert.message)
         }
         .sensoryFeedback(.success, trigger: addedBirthdaysCount)
+        .onChange(of: hasBirthdayToday, initial: true) {
+            if hasBirthdayToday, !reduceMotion, titleCakeBounces == 0 {
+                titleCakeBounces += 1
+            }
+        }
         .onChange(of: scenePhase, initial: true) {
             guard scenePhase == .active else { return }
             today = .now
@@ -217,6 +231,14 @@ struct ContentView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: titleCakeSize, height: titleCakeSize)
+                .keyframeAnimator(initialValue: 0.0, trigger: titleCakeBounces) { cake, offset in
+                    cake.offset(y: offset)
+                } keyframes: { _ in
+                    KeyframeTrack {
+                        CubicKeyframe(-12, duration: 0.18)
+                        SpringKeyframe(0, duration: 0.5, spring: .bouncy(extraBounce: 0.3))
+                    }
+                }
                 .accessibilityHidden(true)
             Text("Niversar.io")
                 .font(.largeTitle.bold())
@@ -228,6 +250,10 @@ struct ContentView: View {
                 isShowingScheduledReminders = true
             }
         #endif
+    }
+
+    private var hasBirthdayToday: Bool {
+        store.birthdays.upcoming(limit: 1, from: today, in: calendar).first?.daysRemaining == 0
     }
 
     private var reminderInputs: ReminderInputs {

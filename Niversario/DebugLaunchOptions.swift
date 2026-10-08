@@ -14,6 +14,10 @@
             ProcessInfo.processInfo.arguments.contains("-demo")
         }
 
+        static var hasNoBirthdayToday: Bool {
+            ProcessInfo.processInfo.arguments.contains("-demoNoToday")
+        }
+
         static var monthOffset: Int {
             UserDefaults.standard.integer(forKey: "monthOffset")
         }
@@ -27,7 +31,8 @@
         static func birthdays(today: Date, calendar: Calendar) -> [Birthday] {
             [
                 person(
-                    "Léa", inDays: 0, year: 1996, color: .rose, emoji: "🌸", nickname: "Lélé",
+                    "Léa", inDays: LaunchOptions.hasNoBirthdayToday ? 5 : 0, year: 1996, color: .rose, emoji: "🌸",
+                    nickname: "Lélé",
                     note: "Adore les pivoines et le chocolat noir.", today: today, calendar: calendar),
                 person(
                     "Hugo", inDays: 3, year: nil, color: .sky, emoji: nil, nickname: nil,
