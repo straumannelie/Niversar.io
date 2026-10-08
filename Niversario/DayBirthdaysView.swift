@@ -10,6 +10,7 @@ struct DayBirthdaysView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var birthdayPendingDeletion: Birthday?
     @State private var presentedBirthday: PresentedBirthday?
+    @Namespace private var zoomNamespace
 
     var body: some View {
         let people = selectedDay.month.birthdaysByDay(store.birthdays)[selectedDay.day] ?? []
@@ -19,11 +20,15 @@ struct DayBirthdaysView: View {
             List {
                 ForEach(upcoming) { upcomingBirthday in
                     Button {
-                        presentedBirthday = PresentedBirthday(id: upcomingBirthday.id)
+                        presentedBirthday = PresentedBirthday(
+                            id: upcomingBirthday.id,
+                            source: .row(upcomingBirthday.id)
+                        )
                     } label: {
                         BirthdayRow(upcoming: upcomingBirthday)
                     }
                     .buttonStyle(.plain)
+                    .matchedTransitionSource(id: ZoomSource.row(upcomingBirthday.id), in: zoomNamespace)
                     .listRowBackground(Color.appSurface)
                     .listRowSeparatorTint(Color.appSeparator)
                     .swipeActions(allowsFullSwipe: false) {
@@ -47,6 +52,7 @@ struct DayBirthdaysView: View {
             }
             .sheet(item: $presentedBirthday) { presented in
                 BirthdayDetailView(birthdayID: presented.id, store: store, today: today, calendar: calendar)
+                    .zoomTransition(from: presented.source, in: zoomNamespace)
             }
             .alert(
                 deletionTitle,

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct PresentedBirthday: Identifiable, Hashable {
     let id: UUID
+    let source: ZoomSource
 }
 
 struct BirthdayDetailView: View {

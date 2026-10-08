@@ -13,6 +13,7 @@ struct BirthdayCalendar: View {
     let birthdays: [Birthday]
     let currentMonth: CalendarMonth
     let todayDay: Int
+    let zoomNamespace: Namespace.ID
     let onSelectDay: (SelectedDay) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -22,11 +23,13 @@ struct BirthdayCalendar: View {
         birthdays: [Birthday],
         currentMonth: CalendarMonth,
         todayDay: Int,
+        zoomNamespace: Namespace.ID,
         onSelectDay: @escaping (SelectedDay) -> Void
     ) {
         self.birthdays = birthdays
         self.currentMonth = currentMonth
         self.todayDay = todayDay
+        self.zoomNamespace = zoomNamespace
         self.onSelectDay = onSelectDay
         _visibleMonth = State(initialValue: currentMonth)
     }
@@ -38,7 +41,8 @@ struct BirthdayCalendar: View {
                     MonthPage(
                         month: month,
                         birthdaysByDay: month.birthdaysByDay(birthdays),
-                        todayDay: month == currentMonth ? todayDay : nil
+                        todayDay: month == currentMonth ? todayDay : nil,
+                        zoomNamespace: zoomNamespace
                     ) { day in
                         onSelectDay(SelectedDay(month: month, day: day))
                     }

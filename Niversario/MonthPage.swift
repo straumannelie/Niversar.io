@@ -5,6 +5,7 @@ struct MonthPage: View {
     let month: CalendarMonth
     let birthdaysByDay: [Int: [Birthday]]
     let todayDay: Int?
+    let zoomNamespace: Namespace.ID
     let onSelectDay: (Int) -> Void
 
     private static let displayedWeekCount = 6
@@ -57,6 +58,9 @@ struct MonthPage: View {
                     cell
                 }
                 .buttonStyle(.plain)
+                .matchedTransitionSource(id: ZoomSource.day(month, day), in: zoomNamespace) {
+                    $0.clipShape(RoundedRectangle(cornerRadius: 100))
+                }
                 .accessibilityLabel(month.birthdayAccessibilityLabel(day: day, firstNames: birthdays.map(\.firstName)))
             }
         } else {

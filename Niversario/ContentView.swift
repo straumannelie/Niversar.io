@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var selectedDay: SelectedDay?
     @State private var presentedBirthday: PresentedBirthday?
     @State private var addedBirthdaysCount = 0
+    @Namespace private var zoomNamespace
     #if DEBUG
         @State private var isShowingScheduledReminders = false
     #endif
@@ -40,18 +41,25 @@ struct ContentView: View {
                     } else {
                         ForEach(nextBirthdays) { upcomingBirthday in
                             Button {
-                                presentedBirthday = PresentedBirthday(id: upcomingBirthday.id)
+                                presentedBirthday = PresentedBirthday(
+                                    id: upcomingBirthday.id,
+                                    source: .card(upcomingBirthday.id)
+                                )
                             } label: {
                                 UpcomingBirthdayCard(upcoming: upcomingBirthday)
                             }
                             .buttonStyle(.plain)
+                            .matchedTransitionSource(id: ZoomSource.card(upcomingBirthday.id), in: zoomNamespace) {
+                                $0.clipShape(.rect(cornerRadius: 20))
+                            }
                             .padding(.horizontal)
                         }
                     }
                     BirthdayCalendar(
                         birthdays: store.birthdays,
                         currentMonth: CalendarMonth.containing(today, in: calendar),
-                        todayDay: calendar.component(.day, from: today)
+                        todayDay: calendar.component(.day, from: today),
+                        zoomNamespace: zoomNamespace
                     ) { day in
                         select(day)
                     }
@@ -83,6 +91,7 @@ struct ContentView: View {
             }
             .sheet(item: $presentedBirthday) { presented in
                 BirthdayDetailView(birthdayID: presented.id, store: store, today: today, calendar: calendar)
+                    .zoomTransition(from: presented.source, in: zoomNamespace)
             }
             #if DEBUG
                 .sheet(isPresented: $isShowingScheduledReminders) {
@@ -118,7 +127,7 @@ struct ContentView: View {
     private func select(_ day: SelectedDay) {
         let people = day.month.birthdaysByDay(store.birthdays)[day.day] ?? []
         if people.count == 1, let person = people.first {
-            presentedBirthday = PresentedBirthday(id: person.id)
+            presentedBirthday = PresentedBirthday(id: person.id, source: .day(day.month, day.day))
         } else {
             selectedDay = day
         }
