@@ -4,13 +4,13 @@
 
 # Niversar.io
 
-Une petite app de rappels d'anniversaire pour mon iPhone 13 mini.
+Une mini app de rappels d'anniversaire pour mon iPhone 13 mini!
 
-Elle est uniquement pour moi : pas de publication sur l'App Store, pas d'autres utilisateurs. J'ajoute les anniversaires à la main, je les retrouve dans un calendrier ou dans une liste, et je reçois une notification le jour J pour ne plus en oublier aucun.
+Un side project que j'ai vibe codé avec Claude Code ; j'en avais une première version en Expo / React Native, que j'ai repassé entièrement en Swift. Pas de publication sur l'App Store, juste pour moi pour l'instant :) 
+
+L'app permet d'ajouter les anniversaires à la main, de les retrouver dans un calendrier ou dans une liste, et de recevoir une notification le jour J pour ne plus en oublier aucun!
 
 Tout reste sur le téléphone, pas de serveur et pas de compte.
-
-C'est un side project que j'ai vibe codé. J'en avais une première version en Expo / React Native, que j'ai recodée entièrement en Swift.
 
 Version actuelle : 1.2
 
