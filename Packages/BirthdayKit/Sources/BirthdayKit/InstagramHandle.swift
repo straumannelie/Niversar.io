@@ -13,7 +13,7 @@ public struct InstagramHandle: Sendable, Hashable {
         let username = candidate.lowercased()
         guard (1...Self.maximumLength).contains(username.count),
             username.allSatisfy(Self.allowedCharacters.contains),
-            let profileURL = URL(string: "https://instagram.com/\(username)")
+            let profileURL = URL(string: "https://www.instagram.com/\(username)/")
         else { return nil }
         self.username = username
         self.profileURL = profileURL

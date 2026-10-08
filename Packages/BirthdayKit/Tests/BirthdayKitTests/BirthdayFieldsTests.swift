@@ -85,7 +85,7 @@ struct BirthdayFieldsTests {
         let handle = try #require(InstagramHandle(input))
 
         #expect(handle.username == expected)
-        #expect(handle.profileURL.absoluteString == "https://instagram.com/\(expected)")
+        #expect(handle.profileURL.absoluteString == "https://www.instagram.com/\(expected)/")
     }
 
     @Test(
