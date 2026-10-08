@@ -34,7 +34,7 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 ## Commandes
 - `scripts/check.sh` : formatage, lint strict, tests du package. Doit passer avant chaque commit.
 - `scripts/run-device.sh` : compile, installe et lance l'app sur l'iPhone.
-- `scripts/screenshot.sh [-demo] [-demoNoToday] [-screen form|edit|detail|day|settings] [-monthOffset N]` : compile pour le simulateur, lance avec ces arguments (Debug uniquement) et enregistre une capture dans `build/screenshots/`.
+- `scripts/screenshot.sh [-demo] [-demoNoToday] [-screen form|edit|detail|day|settings|list] [-search texte] [-monthOffset N]` : compile pour le simulateur, lance avec ces arguments (Debug uniquement) et enregistre une capture dans `build/screenshots/`.
 
 ## Conventions de code
 - **Aucun commentaire dans le code.** Le code doit se lire seul : noms explicites, petites fonctions.

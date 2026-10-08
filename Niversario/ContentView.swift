@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var presentedBirthday: PresentedBirthday?
     @State private var addedBirthdaysCount = 0
     @State private var isShowingSettings = false
+    @State private var isShowingAllBirthdays = false
     @AppStorage(SettingsView.reminderTimeKey) private var reminderMinutes =
         ReminderPlanner.defaultTime.minutesSinceMidnight
     @Namespace private var zoomNamespace
@@ -89,6 +90,12 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button("Tous les anniversaires", systemImage: "list.bullet") {
+                        isShowingAllBirthdays = true
+                    }
+                    .disabled(!store.isLoaded)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Réglages", systemImage: "gearshape") {
                         isShowingSettings = true
                     }
@@ -106,6 +113,9 @@ struct ContentView: View {
                     addedBirthdaysCount += 1
                     Task { await reminders.requestAuthorizationIfNeeded() }
                 }
+            }
+            .sheet(isPresented: $isShowingAllBirthdays) {
+                AllBirthdaysView(store: store, today: today, calendar: calendar)
             }
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView(store: store, reminders: reminders, today: today, calendar: calendar)
@@ -183,6 +193,8 @@ struct ContentView: View {
                 selectedDay = firstSharedDay
             case .settings:
                 isShowingSettings = true
+            case .list:
+                isShowingAllBirthdays = true
             }
         }
 

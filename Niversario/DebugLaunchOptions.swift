@@ -11,6 +11,7 @@
         case detail
         case day
         case settings
+        case list
     }
 
     nonisolated enum LaunchOptions {
@@ -20,6 +21,10 @@
 
         static var hasNoBirthdayToday: Bool {
             ProcessInfo.processInfo.arguments.contains("-demoNoToday")
+        }
+
+        static var searchQuery: String {
+            UserDefaults.standard.string(forKey: "search") ?? ""
         }
 
         static var monthOffset: Int {
