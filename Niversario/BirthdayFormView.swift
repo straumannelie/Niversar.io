@@ -8,6 +8,7 @@ struct BirthdayFormView: View {
     private let editedBirthday: Birthday?
     private let onSave: (Birthday) -> Void
     private let years: [Int]
+    private let initialContent: FormContent
 
     @Environment(\.dismiss) private var dismiss
     @State private var firstName: String
@@ -24,22 +25,53 @@ struct BirthdayFormView: View {
     @State private var isProcessingPhoto = false
     @State private var photoError: String?
     @State private var createdPhotoFileNames: [String] = []
+    @State private var isConfirmingDiscard = false
 
     init(editing birthday: Birthday? = nil, today: Date, calendar: Calendar, onSave: @escaping (Birthday) -> Void) {
         editedBirthday = birthday
         self.onSave = onSave
         years = Array((1900...calendar.component(.year, from: today)).reversed())
         let initialMonth = birthday?.birthDate.month ?? calendar.component(.month, from: today)
-        _firstName = State(initialValue: birthday?.firstName ?? "")
-        _nickname = State(initialValue: birthday?.nickname ?? "")
-        _day = State(initialValue: birthday?.birthDate.day ?? calendar.component(.day, from: today))
-        _month = State(initialValue: initialMonth)
-        _year = State(initialValue: birthday?.birthDate.year)
-        _emoji = State(initialValue: birthday?.emoji ?? "")
-        _color = State(initialValue: birthday?.color ?? PastelColor(month: initialMonth) ?? .rose)
+        let initial = FormContent(
+            firstName: birthday?.firstName ?? "",
+            nickname: birthday?.nickname ?? "",
+            day: birthday?.birthDate.day ?? calendar.component(.day, from: today),
+            month: initialMonth,
+            year: birthday?.birthDate.year,
+            emoji: birthday?.emoji ?? "",
+            color: birthday?.color ?? PastelColor(month: initialMonth) ?? .rose,
+            note: birthday?.note ?? "",
+            photoFileName: birthday?.photoFileName
+        )
+        initialContent = initial
+        _firstName = State(initialValue: initial.firstName)
+        _nickname = State(initialValue: initial.nickname)
+        _day = State(initialValue: initial.day)
+        _month = State(initialValue: initial.month)
+        _year = State(initialValue: initial.year)
+        _emoji = State(initialValue: initial.emoji)
+        _color = State(initialValue: initial.color)
         _isColorChosen = State(initialValue: birthday != nil)
-        _note = State(initialValue: birthday?.note ?? "")
-        _photoFileName = State(initialValue: birthday?.photoFileName)
+        _note = State(initialValue: initial.note)
+        _photoFileName = State(initialValue: initial.photoFileName)
+    }
+
+    private var currentContent: FormContent {
+        FormContent(
+            firstName: firstName,
+            nickname: nickname,
+            day: day,
+            month: month,
+            year: year,
+            emoji: emoji,
+            color: color,
+            note: note,
+            photoFileName: photoFileName
+        )
+    }
+
+    private var hasChanges: Bool {
+        currentContent != initialContent || isProcessingPhoto
     }
 
     private var isEditing: Bool {
@@ -145,6 +177,14 @@ struct BirthdayFormView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(role: .cancel, action: cancel)
+                        .confirmationDialog(
+                            "Abandonner les modifications ?",
+                            isPresented: $isConfirmingDiscard,
+                            titleVisibility: .visible
+                        ) {
+                            Button("Abandonner", role: .destructive, action: discard)
+                            Button("Continuer la saisie", role: .cancel) {}
+                        }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isEditing ? "Enregistrer" : "Ajouter 🎉", action: save)
@@ -161,6 +201,7 @@ struct BirthdayFormView: View {
                 }
             }
         }
+        .interactiveDismissDisabled(hasChanges)
     }
 
     private var photoRow: some View {
@@ -282,7 +323,27 @@ struct BirthdayFormView: View {
     }
 
     private func cancel() {
+        if hasChanges {
+            isConfirmingDiscard = true
+        } else {
+            discard()
+        }
+    }
+
+    private func discard() {
         createdPhotoFileNames.forEach(PhotoStorage.live.delete)
         dismiss()
     }
+}
+
+private struct FormContent: Equatable {
+    let firstName: String
+    let nickname: String
+    let day: Int
+    let month: Int
+    let year: Int?
+    let emoji: String
+    let color: PastelColor
+    let note: String
+    let photoFileName: String?
 }
