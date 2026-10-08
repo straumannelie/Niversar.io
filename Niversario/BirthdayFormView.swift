@@ -1,4 +1,5 @@
 import BirthdayKit
+import PhotosUI
 import SwiftUI
 
 struct BirthdayFormView: View {
@@ -19,6 +20,11 @@ struct BirthdayFormView: View {
     @State private var isColorChosen: Bool
     @State private var instagram: String
     @State private var note: String
+    @State private var photoFileName: String?
+    @State private var photoItem: PhotosPickerItem?
+    @State private var isProcessingPhoto = false
+    @State private var photoError: String?
+    @State private var createdPhotoFileNames: [String] = []
 
     init(editing birthday: Birthday? = nil, today: Date, calendar: Calendar, onSave: @escaping (Birthday) -> Void) {
         editedBirthday = birthday
@@ -35,6 +41,7 @@ struct BirthdayFormView: View {
         _isColorChosen = State(initialValue: birthday != nil)
         _instagram = State(initialValue: birthday?.instagram?.username ?? "")
         _note = State(initialValue: birthday?.note ?? "")
+        _photoFileName = State(initialValue: birthday?.photoFileName)
     }
 
     private var isEditing: Bool {
@@ -54,7 +61,7 @@ struct BirthdayFormView: View {
     }
 
     private var birthday: Birthday? {
-        guard let birthDate, !emojiInput.isInvalid, !instagramInput.isInvalid else { return nil }
+        guard let birthDate, !emojiInput.isInvalid, !instagramInput.isInvalid, !isProcessingPhoto else { return nil }
         return Birthday(
             id: editedBirthday?.id ?? UUID(),
             firstName: firstName,
@@ -64,7 +71,7 @@ struct BirthdayFormView: View {
             nickname: nickname,
             note: note,
             instagram: instagramInput.value,
-            photoFileName: editedBirthday?.photoFileName
+            photoFileName: photoFileName
         )
     }
 
@@ -84,6 +91,17 @@ struct BirthdayFormView: View {
                     TextField("Prénom", text: $firstName)
                         .textContentType(.givenName)
                         .submitLabel(.done)
+                }
+                .listRowBackground(Color.appSurface)
+
+                Section {
+                    photoRow
+                } header: {
+                    Text("Photo")
+                } footer: {
+                    if let photoError {
+                        errorText(photoError)
+                    }
                 }
                 .listRowBackground(Color.appSurface)
 
@@ -147,20 +165,77 @@ struct BirthdayFormView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel) {
-                        dismiss()
-                    }
+                    Button(role: .cancel, action: cancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isEditing ? "Enregistrer" : "Ajouter 🎉", action: save)
                         .disabled(birthday == nil)
                 }
             }
+            .onChange(of: photoItem) {
+                guard let photoItem else { return }
+                Task { await importPhoto(from: photoItem) }
+            }
             .onChange(of: month) {
                 if !isColorChosen, let monthColor = PastelColor(month: month) {
                     color = monthColor
                 }
             }
+        }
+    }
+
+    private var photoRow: some View {
+        HStack(spacing: 16) {
+            StoredPhoto(fileName: photoFileName) {
+                Image(systemName: "person.crop.square")
+                    .font(.largeTitle)
+                    .foregroundStyle(Color.textSecondary)
+            }
+            .frame(width: 64, height: 80)
+            .background(Color.appSurfaceElevated)
+            .clipShape(.rect(cornerRadius: 12))
+            .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 10) {
+                PhotosPicker(
+                    photoFileName == nil ? "Ajouter une photo" : "Remplacer la photo",
+                    selection: $photoItem,
+                    matching: .images
+                )
+                .buttonStyle(.borderless)
+                if photoFileName != nil {
+                    Button("Retirer la photo", role: .destructive) {
+                        photoFileName = nil
+                    }
+                    .buttonStyle(.borderless)
+                }
+            }
+            .disabled(isProcessingPhoto)
+
+            Spacer(minLength: 0)
+            if isProcessingPhoto {
+                ProgressView()
+            }
+        }
+    }
+
+    private func importPhoto(from item: PhotosPickerItem) async {
+        isProcessingPhoto = true
+        photoError = nil
+        defer {
+            isProcessingPhoto = false
+            photoItem = nil
+        }
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self) else {
+                photoError = "Cette photo n'a pas pu être chargée."
+                return
+            }
+            let fileName = try await PhotoStorage.live.saveResizedPhoto(from: data)
+            createdPhotoFileNames.append(fileName)
+            photoFileName = fileName
+        } catch {
+            photoError = "Cette photo n'a pas pu être enregistrée."
         }
     }
 
@@ -220,7 +295,15 @@ struct BirthdayFormView: View {
 
     private func save() {
         guard let birthday else { return }
+        createdPhotoFileNames
+            .filter { $0 != birthday.photoFileName }
+            .forEach(PhotoStorage.live.delete)
         onSave(birthday)
+        dismiss()
+    }
+
+    private func cancel() {
+        createdPhotoFileNames.forEach(PhotoStorage.live.delete)
         dismiss()
     }
 }

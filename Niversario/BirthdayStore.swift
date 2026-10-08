@@ -15,9 +15,11 @@ final class BirthdayStore {
     var alert: StorageAlert?
 
     private let repository: BirthdayFileRepository
+    private let photos: PhotoStorage
 
-    init(repository: BirthdayFileRepository) {
+    init(repository: BirthdayFileRepository, photos: PhotoStorage = .live) {
         self.repository = repository
+        self.photos = photos
     }
 
     static func live() -> BirthdayStore {
@@ -32,6 +34,8 @@ final class BirthdayStore {
         do {
             birthdays = try repository.load()
             isLoaded = true
+            let referencingBirthdays = birthdays
+            Task { await photos.deleteOrphans(referencedBy: referencingBirthdays) }
         } catch {
             alert = StorageAlert(
                 title: "Impossible de lire tes anniversaires",
@@ -42,24 +46,38 @@ final class BirthdayStore {
     }
 
     func addOrReplace(_ birthday: Birthday) {
-        update { $0.addingOrReplacing(birthday) }
+        let previousPhotoFileName = photoFileName(of: birthday.id)
+        guard update({ $0.addingOrReplacing(birthday) }) else { return }
+        if let previousPhotoFileName, previousPhotoFileName != birthday.photoFileName {
+            photos.delete(previousPhotoFileName)
+        }
     }
 
     func remove(id: UUID) {
-        update { $0.removing(id: id) }
+        let previousPhotoFileName = photoFileName(of: id)
+        guard update({ $0.removing(id: id) }) else { return }
+        if let previousPhotoFileName {
+            photos.delete(previousPhotoFileName)
+        }
     }
 
-    private func update(_ change: ([Birthday]) -> [Birthday]) {
-        guard isLoaded else { return }
+    private func photoFileName(of id: UUID) -> String? {
+        birthdays.first { $0.id == id }?.photoFileName
+    }
+
+    private func update(_ change: ([Birthday]) -> [Birthday]) -> Bool {
+        guard isLoaded else { return false }
         birthdays = change(birthdays)
         do {
             try repository.save(birthdays)
+            return true
         } catch {
             alert = StorageAlert(
                 title: "Impossible d'enregistrer",
                 message: "\(error.localizedDescription) La modification reste affichée et l'enregistrement "
                     + "sera retenté à la prochaine modification."
             )
+            return false
         }
     }
 }
