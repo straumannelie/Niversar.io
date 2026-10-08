@@ -61,6 +61,13 @@ final class BirthdayStore {
         }
     }
 
+    func importBirthdays(_ imported: [Birthday]) -> BirthdayMerge? {
+        guard isLoaded else { return nil }
+        let merge = birthdays.merging(imported, availablePhotoFileNames: photos.existingPhotoFileNames())
+        guard update({ _ in merge.birthdays }) else { return nil }
+        return merge
+    }
+
     private func photoFileName(of id: UUID) -> String? {
         birthdays.first { $0.id == id }?.photoFileName
     }

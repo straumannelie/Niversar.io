@@ -29,6 +29,12 @@ nonisolated struct PhotoStorage: Sendable {
         return try? Data(contentsOf: url(for: fileName))
     }
 
+    func existingPhotoFileNames() -> Set<String> {
+        let fileNames =
+            (try? FileManager.default.contentsOfDirectory(atPath: directory.path(percentEncoded: false))) ?? []
+        return Set(fileNames.filter(PhotoFileName.isValid))
+    }
+
     func delete(_ fileName: String) {
         guard PhotoFileName.isValid(fileName) else { return }
         try? FileManager.default.removeItem(at: url(for: fileName))

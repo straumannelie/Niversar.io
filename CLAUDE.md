@@ -57,6 +57,7 @@ Toute logique de calcul (dates, âges, tri, sélection des rappels) vit dans `Bi
 - Année de naissance facultative : pas d'âge affiché si elle est inconnue.
 - Né un 29 février : fêté le 28 février les années non bissextiles.
 - Suppression toujours confirmée.
+- Sauvegarde : export et import manuels d'un fichier JSON au format de l'app (menu « … »), photos non incluses. L'import fusionne par id et ne retire jamais une photo présente sur l'appareil.
 - Modèle Birthday : id, prénom, jour, mois, année (optionnelle), couleur, emoji, surnom, photo, note (tous optionnels sauf id, prénom, jour, mois, couleur).
 - Phrases de notification (tirées au hasard) :
   - « 🎉🥳 C'est l'anniversaire de [Prénom] [Emoji] aujourd'hui ! »

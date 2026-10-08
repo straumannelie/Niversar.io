@@ -39,6 +39,12 @@ public struct Birthday: Identifiable, Sendable, Hashable {
         self.photoFileName = normalizedPhotoFileName
     }
 
+    func withPhotoFileName(_ photoFileName: String?) -> Birthday {
+        var copy = self
+        copy.photoFileName = photoFileName
+        return copy
+    }
+
     public static func normalizedFirstName(_ firstName: String) -> String? {
         normalizedText(firstName)
     }
