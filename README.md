@@ -6,7 +6,7 @@
 
 Une mini app de rappels d'anniversaire pour mon iPhone 13 mini!
 
-Un side project que j'ai vibe codé avec Claude Code ; j'en avais une première version en Expo / React Native, que j'ai repassé entièrement en Swift. Pas de publication sur l'App Store, juste pour moi pour l'instant :) 
+Un side project que j'ai développée avec un agent IA (Claude Code), typée et testée ; j'en avais une première version en Expo / React Native, que j'ai repassé entièrement en Swift. Pas de publication sur l'App Store, juste pour moi pour l'instant :) 
 
 L'app permet d'ajouter les anniversaires à la main, de les retrouver dans un calendrier ou dans une liste, et de recevoir une notification le jour J pour ne plus en oublier aucun!
 
